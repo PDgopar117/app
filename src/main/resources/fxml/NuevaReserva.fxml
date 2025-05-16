@@ -1,0 +1,40 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.NuevaReservaController"
+      styleClass="nueva-reserva-container" spacing="20">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <Label text="Nueva reserva" styleClass="titulo-seccion"/>
+    
+    <HBox spacing="20">
+        <VBox styleClass="seccion-habitaciones" HBox.hgrow="ALWAYS">
+            <Label text="Seleccionar Habitación" styleClass="subtitulo-seccion"/>
+            
+            <FlowPane fx:id="habitacionesContainer" styleClass="habitaciones-container"/>
+        </VBox>
+        
+        <VBox styleClass="seccion-detalles" spacing="15">
+            <Label text="Duración" styleClass="subtitulo-seccion"/>
+            
+            <TextField fx:id="duracionField" promptText="12:40 AM" styleClass="campo-texto"/>
+            
+            <Label text="Total a pagar" styleClass="subtitulo-seccion"/>
+            
+            <Label fx:id="montoTotalLabel" text="$300.0" styleClass="monto-total"/>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <Button fx:id="reservarButton" text="Reservar" styleClass="boton-primario"/>
+        </VBox>
+    </HBox>
+</VBox>

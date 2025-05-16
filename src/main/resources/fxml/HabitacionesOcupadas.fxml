@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.HabitacionesOcupadasController"
+      styleClass="habitaciones-ocupadas-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <Label text="Habitaciones Ocupadas" styleClass="titulo-seccion"/>
+    
+    <HBox styleClass="leyenda">
+        <HBox styleClass="leyenda-item">
+            <Circle styleClass="estado-normal" radius="5"/>
+            <Label text="Normal"/>
+        </HBox>
+        
+        <HBox styleClass="leyenda-item">
+            <Circle styleClass="estado-proximo" radius="5"/>
+            <Label text="Próximo"/>
+        </HBox>
+        
+        <HBox styleClass="leyenda-item">
+            <Circle styleClass="estado-excedido" radius="5"/>
+            <Label text="Excedido"/>
+        </HBox>
+    </HBox>
+    
+    <TilePane fx:id="habitacionesContainer" styleClass="habitaciones-container" hgap="20" vgap="20"/>
+</VBox>

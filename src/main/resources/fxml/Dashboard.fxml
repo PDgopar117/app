@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.DashboardController"
+      styleClass="dashboard-container">
+    
+    <!-- Menú lateral (izquierda) -->
+    <left>
+        <VBox styleClass="menu-lateral">
+            <!-- Logo y título -->
+            <HBox styleClass="logo-container" spacing="10" alignment="CENTER_LEFT">
+                <ImageView fitHeight="40" fitWidth="40" styleClass="logo-image"/>
+                <Label text="Motel App" styleClass="app-title"/>
+            </HBox>
+            
+            <!-- Botones del menú -->
+            <VBox styleClass="menu-items" spacing="5">
+                <Button fx:id="dashboardButton" text="Dashboard" styleClass="menu-item,menu-item-activo"/>
+                <Button fx:id="habitacionesButton" text="Habitaciones" styleClass="menu-item"/>
+                <Button fx:id="reservasButton" text="Reservas" styleClass="menu-item"/>
+                <Button fx:id="finanzasButton" text="Finanzas" styleClass="menu-item"/>
+                <Button fx:id="reportesButton" text="Reportes" styleClass="menu-item"/>
+                <Button fx:id="configuracionButton" text="Configuración" styleClass="menu-item"/>
+            </VBox>
+            
+            <Region VBox.vgrow="ALWAYS"/>
+            
+            <!-- Información del usuario -->
+            <VBox styleClass="user-info">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <ImageView fitHeight="40" fitWidth="40" styleClass="user-avatar"/>
+                    <VBox>
+                        <Label text="Admin User" styleClass="user-name"/>
+                        <Label text="admin@motel.com" styleClass="user-email"/>
+                    </VBox>
+                </HBox>
+                <Button text="Cerrar Sesión" styleClass="logout-button"/>
+            </VBox>
+        </VBox>
+    </left>
+    
+    <!-- Área de contenido principal -->
+    <center>
+        <StackPane fx:id="contentArea"/>
+    </center>
+    
+</BorderPane>

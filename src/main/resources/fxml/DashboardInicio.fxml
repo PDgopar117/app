@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.DashboardInicioController"
+      styleClass="dashboard-inicio">
+    
+    <padding>
+        <Insets top="20" right="30" bottom="20" left="30"/>
+    </padding>
+
+    <!-- Header con botón nueva reserva -->
+    <HBox alignment="CENTER_RIGHT" styleClass="header-container">
+        <Button styleClass="btn-nueva-reserva" onAction="#handleNuevaReserva">
+            <graphic>
+                <HBox spacing="5" alignment="CENTER">
+                    <ImageView fitHeight="16" fitWidth="16">
+                        <Image url="@/images/icons/calendar.png"/>
+                    </ImageView>
+                    <Label text="Nueva Reserva" styleClass="btn-text"/>
+                </HBox>
+            </graphic>
+        </Button>
+    </HBox>
+    
+    <!-- Tarjetas de estadísticas -->
+    <HBox spacing="20" styleClass="stats-container">
+        <!-- Ocupación Actual -->
+        <VBox styleClass="stat-card">
+            <VBox>
+                <Label text="Ocupación Actual" styleClass="stat-title"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="ocupacionLabel" text="75%" styleClass="stat-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <StackPane styleClass="stat-icon-container, purple-bg">
+                        <ImageView fitHeight="24" fitWidth="24">
+                            <Image url="@/images/icons/room.png"/>
+                        </ImageView>
+                    </StackPane>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- Habitaciones Disponibles -->
+        <VBox styleClass="stat-card">
+            <VBox>
+                <Label text="Habitaciones Disponibles" styleClass="stat-title"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="habitacionesLabel" text="8" styleClass="stat-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <StackPane styleClass="stat-icon-container, green-bg">
+                        <ImageView fitHeight="24" fitWidth="24">
+                            <Image url="@/images/icons/room.png"/>
+                        </ImageView>
+                    </StackPane>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- Ingresos del Día -->
+        <VBox styleClass="stat-card">
+            <VBox>
+                <Label text="Ingresos del Día" styleClass="stat-title"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="ingresosLabel" text="458.900" styleClass="stat-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <StackPane styleClass="stat-icon-container, blue-bg">
+                        <ImageView fitHeight="24" fitWidth="24">
+                            <Image url="@/images/icons/money.png"/>
+                        </ImageView>
+                    </StackPane>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- Egresos del Día -->
+        <VBox styleClass="stat-card">
+            <VBox>
+                <Label text="Egresos del Día" styleClass="stat-title"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label fx:id="egresosLabel" text="156.700" styleClass="stat-value"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <StackPane styleClass="stat-icon-container, red-bg">
+                        <ImageView fitHeight="24" fitWidth="24">
+                            <Image url="@/images/icons/money.png"/>
+                        </ImageView>
+                    </StackPane>
+                </HBox>
+            </VBox>
+        </VBox>
+    </HBox>
+
+    <!-- Estado de Habitaciones -->
+    <VBox spacing="15" styleClass="rooms-section">
+        <Label text="Estado de Habitaciones" styleClass="section-title"/>
+        
+        <!-- Leyenda -->
+        <HBox spacing="20" styleClass="legend-container">
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Circle radius="4" styleClass="status-dot,available"/>
+                <Label text="Disponible"/>
+            </HBox>
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Circle radius="4" styleClass="status-dot,occupied"/>
+                <Label text="Ocupada"/>
+            </HBox>
+            <HBox spacing="5" alignment="CENTER_LEFT">
+                <Circle radius="4" styleClass="status-dot,cleaning"/>
+                <Label text="Limpieza"/>
+            </HBox>
+        </HBox>
+
+        <!-- Grid de habitaciones -->
+        <GridPane fx:id="habitacionesGrid" hgap="20" vgap="20">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="150"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="150"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="150"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="150"/>
+            </columnConstraints>
+        </GridPane>
+    </VBox>
+</VBox>

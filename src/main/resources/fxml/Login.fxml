@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.LoginController"
+      alignment="CENTER" spacing="20" styleClass="login-container">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <ImageView fitHeight="80" fitWidth="80" preserveRatio="true">
+        <Image url="@/images/logo.png"/>
+    </ImageView>
+    
+    <Label text="Bienvenido" styleClass="titulo-login"/>
+    <Label text="Ingresa a tu cuenta para continuar" styleClass="subtitulo-login"/>
+    
+    <VBox spacing="5">
+        <Label text="Usuario" styleClass="label-campo"/>
+        <TextField fx:id="usuarioField" promptText="Ingresa tu usuario" styleClass="campo-texto"/>
+    </VBox>
+    
+    <VBox spacing="5">
+        <Label text="Contraseña" styleClass="label-campo"/>
+        <PasswordField fx:id="passwordField" promptText="Ingresa tu contraseña" styleClass="campo-texto"/>
+    </VBox>
+    
+    <Button fx:id="loginButton" text="Iniciar Sesión" onAction="#handleLoginAction" styleClass="boton-primario"/>
+    
+    <Hyperlink fx:id="recuperarPasswordButton" text="¿Olvidaste tu contraseña?" 
+              onAction="#handleRecuperarPassword" styleClass="link-recuperar"/>
+              
+</VBox>

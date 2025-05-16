@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.ReportesController"
+      styleClass="reportes-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <Label text="Generación de Reportes" styleClass="titulo-seccion"/>
+    
+    <HBox styleClass="reportes-opciones" spacing="20">
+        <VBox styleClass="reporte-opcion">
+            <ImageView fitHeight="64" fitWidth="64">
+                <Image url="@/images/icons/sales_report.png"/>
+            </ImageView>
+            <Label text="Reporte de Ventas" styleClass="reporte-titulo"/>
+            <Label text="Informe detallado de ingresos y egresos" styleClass="reporte-descripcion"/>
+            <Button fx:id="reporteVentasButton" text="Generar" styleClass="boton-primario"/>
+        </VBox>
+        
+        <VBox styleClass="reporte-opcion">
+            <ImageView fitHeight="64" fitWidth="64">
+                <Image url="@/images/icons/occupancy_report.png"/>
+            </ImageView>
+            <Label text="Reporte de Ocupación" styleClass="reporte-titulo"/>
+            <Label text="Análisis de ocupación de habitaciones" styleClass="reporte-descripcion"/>
+            <Button fx:id="reporteOcupacionButton" text="Generar" styleClass="boton-primario"/>
+        </VBox>
+        
+        <VBox styleClass="reporte-opcion">
+            <ImageView fitHeight="64" fitWidth="64">
+                <Image url="@/images/icons/financial_report.png"/>
+            </ImageView>
+            <Label text="Reporte Financiero" styleClass="reporte-titulo"/>
+            <Label text="Resumen financiero del negocio" styleClass="reporte-descripcion"/>
+            <Button fx:id="reporteFinancieroButton" text="Generar" styleClass="boton-primario"/>
+        </VBox>
+    </HBox>
+    
+    <TitledPane text="Personalizar Reporte">
+        <VBox spacing="15">
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Tipo de Reporte:" styleClass="label-campo"/>
+                <ComboBox fx:id="tipoReporteComboBox" promptText="Seleccionar tipo"/>
+                
+                <Label text="Formato:" styleClass="label-campo"/>
+                <ComboBox fx:id="formatoReporteComboBox" promptText="Seleccionar formato"/>
+                
+                <Label text="Periodo:" styleClass="label-campo"/>
+                <ComboBox fx:id="periodoReporteComboBox" promptText="Seleccionar periodo"/>
+            </HBox>
+            
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Label text="Fecha Inicio:" styleClass="label-campo"/>
+                <DatePicker fx:id="fechaInicioReporteSelector"/>
+                
+                <Label text="Fecha Fin:" styleClass="label-campo"/>
+                <DatePicker fx:id="fechaFinReporteSelector"/>
+                
+                <Button fx:id="generarReporteCustomButton" text="Generar Reporte" styleClass="boton-primario"/>
+            </HBox>
+            
+            <CheckBox text="Incluir gráficos"/>
+            <CheckBox text="Mostrar datos detallados"/>
+            <CheckBox text="Enviar por correo electrónico"/>
+        </VBox>
+    </TitledPane>
+    
+    <VBox VBox.vgrow="ALWAYS">
+        <Label text="Reportes Recientes" styleClass="subtitulo-seccion"/>
+        <TableView fx:id="reportesRecientesTableView" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn text="Nombre"/>
+                <TableColumn text="Tipo"/>
+                <TableColumn text="Fecha"/>
+                <TableColumn text="Usuario"/>
+                <TableColumn text="Acciones"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

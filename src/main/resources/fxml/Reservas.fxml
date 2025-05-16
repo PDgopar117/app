@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.ReservasController"
+      styleClass="reservas-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Label text="Gestión de Reservas" styleClass="titulo-seccion"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="nuevaReservaButton" text="Nueva Reserva" styleClass="boton-primario"/>
+    </HBox>
+    
+    <TabPane>
+        <Tab text="Reservas Activas">
+            <VBox spacing="15">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Habitaciones Ocupadas" styleClass="subtitulo-seccion"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="actualizarButton" text="Actualizar" styleClass="boton-secundario"/>
+                </HBox>
+                
+                <TilePane fx:id="habitacionesOcupadasContainer" hgap="15" vgap="15"/>
+            </VBox>
+        </Tab>
+        
+        <Tab text="Historial de Reservas">
+            <VBox spacing="15">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Filtros" styleClass="subtitulo-seccion"/>
+                    <DatePicker fx:id="fechaDesdeSelector" promptText="Fecha desde"/>
+                    <DatePicker fx:id="fechaHastaSelector" promptText="Fecha hasta"/>
+                    <ComboBox fx:id="estadoComboBox" promptText="Estado"/>
+                    <Button fx:id="buscarReservasButton" text="Buscar" styleClass="boton-primario"/>
+                    <Button fx:id="exportarReservasButton" text="Exportar" styleClass="boton-secundario"/>
+                </HBox>
+                
+                <TableView fx:id="reservasTableView" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="idReservaColumn" text="ID"/>
+                        <TableColumn fx:id="habitacionColumn" text="Habitación"/>
+                        <TableColumn fx:id="checkInColumn" text="Check-In"/>
+                        <TableColumn fx:id="checkOutColumn" text="Check-Out"/>
+                        <TableColumn fx:id="duracionColumn" text="Duración"/>
+                        <TableColumn fx:id="montoColumn" text="Monto"/>
+                        <TableColumn fx:id="estadoReservaColumn" text="Estado"/>
+                        <TableColumn fx:id="accionesReservaColumn" text="Acciones"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

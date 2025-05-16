@@ -1,0 +1,82 @@
+/* Estilos para el Dashboard Inicio */
+.dashboard-inicio {
+    -fx-background-color: #F8F9FA;
+}
+
+.header-container {
+    -fx-padding: 0 0 20 0;
+}
+
+.btn-nueva-reserva {
+    -fx-background-color: #6C38FF;
+    -fx-background-radius: 8;
+    -fx-padding: 10 20;
+}
+
+.btn-nueva-reserva:hover {
+    -fx-background-color: derive(#6C38FF, -10%);
+}
+
+/* Tarjetas de estadísticas */
+.stat-card {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);
+    -fx-pref-width: 250;
+}
+
+.stat-title {
+    -fx-font-size: 14;
+    -fx-text-fill: #6C757D;
+}
+
+.stat-value {
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
+}
+
+/* Estado de habitaciones */
+.section-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+}
+
+.status-dot {
+    -fx-stroke: none;
+}
+
+.status-dot.available {
+    -fx-fill: #2ECC71;
+}
+
+.status-dot.occupied {
+    -fx-fill: #E74C3C;
+}
+
+.status-dot.cleaning {
+    -fx-fill: #F1C40F;
+}
+
+/* Tarjetas de habitaciones */
+.room-card {
+    -fx-background-color: white;
+    -fx-padding: 15;
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.room-number {
+    -fx-font-weight: bold;
+    -fx-font-size: 16;
+}
+
+.room-type {
+    -fx-text-fill: #6C757D;
+    -fx-font-size: 14;
+}
+
+.room-time {
+    -fx-text-fill: #6C757D;
+    -fx-font-size: 12;
+}

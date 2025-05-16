@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.HabitacionesController"
+      styleClass="habitaciones-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Label text="Administración de Habitaciones" styleClass="titulo-seccion"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="agregarHabitacionButton" text="Nueva Habitación" styleClass="boton-primario"/>
+    </HBox>
+    
+    <HBox styleClass="tarjetas-container">
+        <VBox styleClass="tarjeta">
+            <Label text="Total Habitaciones" styleClass="tarjeta-titulo"/>
+            <Label fx:id="totalHabitacionesLabel" text="0" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Habitaciones Disponibles" styleClass="tarjeta-titulo"/>
+            <Label fx:id="habitacionesDisponiblesLabel" text="0" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Habitaciones Ocupadas" styleClass="tarjeta-titulo"/>
+            <Label fx:id="habitacionesOcupadasLabel" text="0" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="En Limpieza" styleClass="tarjeta-titulo"/>
+            <Label fx:id="habitacionesLimpiezaLabel" text="0" styleClass="tarjeta-valor"/>
+        </VBox>
+    </HBox>
+    
+    <VBox VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Lista de Habitaciones" styleClass="subtitulo-seccion"/>
+            
+            <HBox styleClass="leyenda" alignment="CENTER_LEFT" spacing="15">
+                <HBox styleClass="leyenda-item" alignment="CENTER_LEFT" spacing="5">
+                    <Circle styleClass="estado-disponible" radius="5"/>
+                    <Label text="Disponible"/>
+                </HBox>
+                
+                <HBox styleClass="leyenda-item" alignment="CENTER_LEFT" spacing="5">
+                    <Circle styleClass="estado-ocupada" radius="5"/>
+                    <Label text="Ocupada"/>
+                </HBox>
+                
+                <HBox styleClass="leyenda-item" alignment="CENTER_LEFT" spacing="5">
+                    <Circle styleClass="estado-limpieza" radius="5"/>
+                    <Label text="Limpieza"/>
+                </HBox>
+            </HBox>
+            
+            <Region HBox.hgrow="ALWAYS"/>
+            
+            <TextField fx:id="buscarField" promptText="Buscar..."/>
+            <ComboBox fx:id="filtroTipoComboBox" promptText="Filtrar por tipo"/>
+            <ComboBox fx:id="filtroEstadoComboBox" promptText="Filtrar por estado"/>
+        </HBox>
+        
+        <TableView fx:id="habitacionesTableView" VBox.vgrow="ALWAYS">
+            <columns>
+                <TableColumn fx:id="numeroColumn" text="Número"/>
+                <TableColumn fx:id="tipoColumn" text="Tipo"/>
+                <TableColumn fx:id="estadoColumn" text="Estado"/>
+                <TableColumn fx:id="tarifaColumn" text="Tarifa"/>
+                <TableColumn fx:id="accionesColumn" text="Acciones"/>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

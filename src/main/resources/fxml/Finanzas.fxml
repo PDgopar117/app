@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.FinanzasController"
+      styleClass="finanzas-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Label text="Finanzas" styleClass="titulo-seccion"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <Label text="Fecha:"/>
+        <DatePicker fx:id="fechaSelector" styleClass="selector-fecha"/>
+    </HBox>
+    
+    <HBox styleClass="tarjetas-container">
+        <VBox styleClass="tarjeta">
+            <Label text="Ingresos del día" styleClass="tarjeta-titulo"/>
+            <Label fx:id="ingresosDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Egresos del día" styleClass="tarjeta-titulo"/>
+            <Label fx:id="egresosDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Balance" styleClass="tarjeta-titulo"/>
+            <Label fx:id="balanceDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+        </VBox>
+    </HBox>
+    
+    <TabPane>
+        <Tab text="Transacciones">
+            <HBox spacing="20">
+                <VBox spacing="15" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Ingresos" styleClass="subtitulo-seccion"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="agregarIngresoButton" text="Agregar ingreso" styleClass="boton-primario"/>
+                    </HBox>
+                    
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="ingresosContainer" spacing="10"/>
+                    </ScrollPane>
+                </VBox>
+                
+                <VBox spacing="15" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Egresos" styleClass="subtitulo-seccion"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="agregarEgresoButton" text="Agregar egreso" styleClass="boton-primario"/>
+                    </HBox>
+                    
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                        <VBox fx:id="egresosContainer" spacing="10"/>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
+        </Tab>
+        
+        <Tab text="Gráficos">
+            <VBox spacing="20">
+                <Label text="Evolución de ingresos y egresos" styleClass="subtitulo-seccion"/>
+                <LineChart>
+                    <xAxis>
+                        <CategoryAxis label="Fecha"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Monto"/>
+                    </yAxis>
+                </LineChart>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

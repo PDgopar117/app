@@ -1,0 +1,78 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.ReporteVentasController"
+      styleClass="reporte-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <HBox styleClass="filtros-container" spacing="15" alignment="CENTER_LEFT">
+        <Label text="Reporte de Ventas" styleClass="titulo-seccion"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        
+        <Label text="Desde:"/>
+        <DatePicker fx:id="fechaInicioSelector"/>
+        
+        <Label text="Hasta:"/>
+        <DatePicker fx:id="fechaFinSelector"/>
+        
+        <Button fx:id="generarButton" text="Generar" styleClass="boton-primario"/>
+        <Button fx:id="exportarButton" text="Exportar" styleClass="boton-secundario"/>
+    </HBox>
+    
+    <HBox styleClass="tarjetas-container">
+        <VBox styleClass="tarjeta">
+            <Label text="Total Ingresos" styleClass="tarjeta-titulo"/>
+            <Label fx:id="totalIngresosLabel" text="$2,458,900" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Total Egresos" styleClass="tarjeta-titulo"/>
+            <Label fx:id="totalEgresosLabel" text="$856,700" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Balance" styleClass="tarjeta-titulo"/>
+            <Label fx:id="balanceLabel" text="$1,602,200" styleClass="tarjeta-valor"/>
+        </VBox>
+        
+        <VBox styleClass="tarjeta">
+            <Label text="Habitaciones Reservadas" styleClass="tarjeta-titulo"/>
+            <Label fx:id="totalReservasLabel" text="87" styleClass="tarjeta-valor"/>
+        </VBox>
+    </HBox>
+    
+    <TabPane styleClass="tab-container">
+        <Tab text="Gráfico de Ingresos">
+            <LineChart fx:id="ingresosChart">
+                <xAxis>
+                    <CategoryAxis label="Fecha"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Monto"/>
+                </yAxis>
+            </LineChart>
+        </Tab>
+        
+        <Tab text="Detalles">
+            <TableView fx:id="detallesTabla">
+                <columns>
+                    <TableColumn fx:id="fechaColumn" text="Fecha"/>
+                    <TableColumn fx:id="ingresosColumn" text="Ingresos"/>
+                    <TableColumn fx:id="egresosColumn" text="Egresos"/>
+                    <TableColumn fx:id="balanceColumn" text="Balance"/>
+                    <TableColumn fx:id="reservasColumn" text="Reservas"/>
+                </columns>
+            </TableView>
+        </Tab>
+    </TabPane>
+</VBox>

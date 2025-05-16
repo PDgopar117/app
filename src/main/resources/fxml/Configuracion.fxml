@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.ConfiguracionController"
+      styleClass="configuracion-container" spacing="20">
+    
+    <padding>
+        <Insets top="30" right="30" bottom="30" left="30"/>
+    </padding>
+    
+    <Label text="Configuración" styleClass="titulo-seccion"/>
+    
+    <TabPane styleClass="configuracion-tabs">
+        <Tab text="General">
+            <VBox spacing="15">
+                <Label text="Configuración General" styleClass="subtitulo-seccion"/>
+                
+                <GridPane vgap="10" hgap="10">
+                    <Label text="Nombre del Negocio:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="nombreNegocioField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    
+                    <Label text="Dirección:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="direccionField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    
+                    <Label text="Teléfono:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="telefonoField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                </GridPane>
+            </VBox>
+        </Tab>
+        
+        <Tab text="Usuario">
+            <VBox spacing="15">
+                <Label text="Configuración de Usuario" styleClass="subtitulo-seccion"/>
+                
+                <GridPane vgap="10" hgap="10">
+                    <Label text="Cambiar Contraseña:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="passwordActualField" promptText="Contraseña Actual" 
+                                 GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    
+                    <PasswordField fx:id="nuevaPasswordField" promptText="Nueva Contraseña" 
+                                 GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    
+                    <PasswordField fx:id="confirmarPasswordField" promptText="Confirmar Contraseña" 
+                                 GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                </GridPane>
+                
+                <Button text="Cambiar Contraseña" styleClass="boton-primario"/>
+            </VBox>
+        </Tab>
+        
+        <Tab text="Sistema">
+            <VBox spacing="15">
+                <Label text="Configuración del Sistema" styleClass="subtitulo-seccion"/>
+                
+                <VBox spacing="10">
+                    <CheckBox text="Iniciar automáticamente con Windows"/>
+                    <CheckBox text="Minimizar a la bandeja del sistema"/>
+                    <CheckBox text="Mostrar notificaciones"/>
+                </VBox>
+                
+                <VBox spacing="10">
+                    <Label text="Respaldo de Base de Datos"/>
+                    <HBox spacing="10">
+                        <Button text="Crear Respaldo" styleClass="boton-secundario"/>
+                        <Button text="Restaurar Respaldo" styleClass="boton-secundario"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>
