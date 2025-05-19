@@ -22,12 +22,12 @@
             
             <!-- Botones del menú -->
             <VBox styleClass="menu-items" spacing="5">
-                <Button fx:id="dashboardButton" text="Dashboard" styleClass="menu-item,menu-item-activo"/>
-                <Button fx:id="habitacionesButton" text="Habitaciones" styleClass="menu-item"/>
-                <Button fx:id="reservasButton" text="Reservas" styleClass="menu-item"/>
-                <Button fx:id="finanzasButton" text="Finanzas" styleClass="menu-item"/>
-                <Button fx:id="reportesButton" text="Reportes" styleClass="menu-item"/>
-                <Button fx:id="configuracionButton" text="Configuración" styleClass="menu-item"/>
+                <Button fx:id="dashboardButton" text="Dashboard" styleClass="menu-item,menu-item-activo" onAction="#handleDashboardClick"/>
+                <Button fx:id="habitacionesButton" text="Habitaciones" styleClass="menu-item" onAction="#handleHabitacionesClick"/>
+                <Button fx:id="reservasButton" text="Reservas" styleClass="menu-item" onAction="#handleReservasClick"/>
+                <Button fx:id="finanzasButton" text="Finanzas" styleClass="menu-item" onAction="#handleFinanzasClick"/>
+                <Button fx:id="reportesButton" text="Reportes" styleClass="menu-item" onAction="#handleReportesClick"/>
+                <Button fx:id="configuracionButton" text="Configuración" styleClass="menu-item" onAction="#handleConfiguracionClick"/>
             </VBox>
             
             <Region VBox.vgrow="ALWAYS"/>

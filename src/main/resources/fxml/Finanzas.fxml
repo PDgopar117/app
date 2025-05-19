@@ -27,17 +27,17 @@
     <HBox styleClass="tarjetas-container">
         <VBox styleClass="tarjeta">
             <Label text="Ingresos del día" styleClass="tarjeta-titulo"/>
-            <Label fx:id="ingresosDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+            <Label fx:id="ingresosDiaLabel" text="0" styleClass="tarjeta-valor"/>
         </VBox>
         
         <VBox styleClass="tarjeta">
             <Label text="Egresos del día" styleClass="tarjeta-titulo"/>
-            <Label fx:id="egresosDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+            <Label fx:id="egresosDiaLabel" text="0" styleClass="tarjeta-valor"/>
         </VBox>
         
         <VBox styleClass="tarjeta">
             <Label text="Balance" styleClass="tarjeta-titulo"/>
-            <Label fx:id="balanceDiaLabel" text="$0" styleClass="tarjeta-valor"/>
+            <Label fx:id="balanceDiaLabel" text="0" styleClass="tarjeta-valor"/>
         </VBox>
     </HBox>
     

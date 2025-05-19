@@ -1,78 +1,50 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.geometry.Insets?>
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.elencanto.app.controller.ReporteVentasController"
-      styleClass="reporte-container" spacing="20">
-    
-    <padding>
-        <Insets top="30" right="30" bottom="30" left="30"/>
-    </padding>
-    
-    <HBox styleClass="filtros-container" spacing="15" alignment="CENTER_LEFT">
-        <Label text="Reporte de Ventas" styleClass="titulo-seccion"/>
-        <Region HBox.hgrow="ALWAYS"/>
-        
+      spacing="10"
+      padding="20">
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
         <Label text="Desde:"/>
-        <DatePicker fx:id="fechaInicioSelector"/>
-        
+        <DatePicker fx:id="fechaInicioPicker"/>
         <Label text="Hasta:"/>
-        <DatePicker fx:id="fechaFinSelector"/>
-        
-        <Button fx:id="generarButton" text="Generar" styleClass="boton-primario"/>
-        <Button fx:id="exportarButton" text="Exportar" styleClass="boton-secundario"/>
+        <DatePicker fx:id="fechaFinPicker"/>
+        <Button text="Actualizar" onAction="#actualizarReporte"/>
     </HBox>
-    
-    <HBox styleClass="tarjetas-container">
-        <VBox styleClass="tarjeta">
-            <Label text="Total Ingresos" styleClass="tarjeta-titulo"/>
-            <Label fx:id="totalIngresosLabel" text="$2,458,900" styleClass="tarjeta-valor"/>
-        </VBox>
-        
-        <VBox styleClass="tarjeta">
-            <Label text="Total Egresos" styleClass="tarjeta-titulo"/>
-            <Label fx:id="totalEgresosLabel" text="$856,700" styleClass="tarjeta-valor"/>
-        </VBox>
-        
-        <VBox styleClass="tarjeta">
-            <Label text="Balance" styleClass="tarjeta-titulo"/>
-            <Label fx:id="balanceLabel" text="$1,602,200" styleClass="tarjeta-valor"/>
-        </VBox>
-        
-        <VBox styleClass="tarjeta">
-            <Label text="Habitaciones Reservadas" styleClass="tarjeta-titulo"/>
-            <Label fx:id="totalReservasLabel" text="87" styleClass="tarjeta-valor"/>
-        </VBox>
-    </HBox>
-    
-    <TabPane styleClass="tab-container">
-        <Tab text="Gráfico de Ingresos">
-            <LineChart fx:id="ingresosChart">
-                <xAxis>
-                    <CategoryAxis label="Fecha"/>
-                </xAxis>
-                <yAxis>
-                    <NumberAxis label="Monto"/>
-                </yAxis>
-            </LineChart>
-        </Tab>
-        
-        <Tab text="Detalles">
-            <TableView fx:id="detallesTabla">
-                <columns>
-                    <TableColumn fx:id="fechaColumn" text="Fecha"/>
-                    <TableColumn fx:id="ingresosColumn" text="Ingresos"/>
-                    <TableColumn fx:id="egresosColumn" text="Egresos"/>
-                    <TableColumn fx:id="balanceColumn" text="Balance"/>
-                    <TableColumn fx:id="reservasColumn" text="Reservas"/>
-                </columns>
-            </TableView>
-        </Tab>
-    </TabPane>
+
+    <GridPane hgap="10" vgap="10">
+        <Label fx:id="totalIngresosLabel" text="Total Ingresos: $0.00"
+               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <Label fx:id="totalEgresosLabel" text="Total Egresos: $0.00"
+               GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+        <Label fx:id="balanceLabel" text="Balance: $0.00"
+               GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+        <Label fx:id="totalReservasLabel" text="Total Reservas: 0"
+               GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+    </GridPane>
+
+    <BarChart fx:id="ingresosEgresosChart" title="Ingresos y Egresos">
+        <xAxis>
+            <CategoryAxis label="Fecha"/>
+        </xAxis>
+        <yAxis>
+            <NumberAxis label="Monto ($)"/>
+        </yAxis>
+    </BarChart>
+
+    <LineChart fx:id="reservasChart" title="Reservas por Día">
+        <xAxis>
+            <CategoryAxis label="Fecha"/>
+        </xAxis>
+        <yAxis>
+            <NumberAxis label="Cantidad de Reservas"/>
+        </yAxis>
+    </LineChart>
 </VBox>

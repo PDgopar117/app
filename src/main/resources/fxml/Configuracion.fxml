@@ -7,68 +7,103 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.elencanto.app.controller.ConfiguracionController"
-      styleClass="configuracion-container" spacing="20">
+      styleClass="configuracion-container" 
+      spacing="20"
+      stylesheets="/styles/styles.css">
     
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>
     </padding>
     
-    <Label text="Configuración" styleClass="titulo-seccion"/>
+    <Label text="Configuración del Sistema" styleClass="titulo-seccion"/>
     
-    <TabPane styleClass="configuracion-tabs">
-        <Tab text="General">
+    <TabPane fx:id="configTabPane" styleClass="configuracion-tabs">
+        <!-- Pestaña de Usuarios -->
+        <Tab text="Usuarios" closable="false">
             <VBox spacing="15">
-                <Label text="Configuración General" styleClass="subtitulo-seccion"/>
+                <Label text="Gestión de Usuarios" styleClass="subtitulo-seccion"/>
                 
                 <GridPane vgap="10" hgap="10">
-                    <Label text="Nombre del Negocio:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <TextField fx:id="nombreNegocioField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label text="Usuario:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                     
-                    <Label text="Dirección:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                    <TextField fx:id="direccionField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label text="Contraseña:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <PasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                     
-                    <Label text="Teléfono:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                    <TextField fx:id="telefonoField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <Label text="Email:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="emailField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    
+                    <Label text="Rol:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="rolComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
                 </GridPane>
+                
+                <HBox spacing="10">
+                    <Button text="Crear Usuario" 
+                            onAction="#crearUsuario" 
+                            styleClass="boton-primario"/>
+                </HBox>
+                
+                <TableView fx:id="usuariosTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="usernameColumn" text="Usuario" prefWidth="150"/>
+                        <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
+                        <TableColumn fx:id="rolColumn" text="Rol" prefWidth="100"/>
+                    </columns>
+                </TableView>
             </VBox>
         </Tab>
         
-        <Tab text="Usuario">
+        <!-- Pestaña de Habitaciones -->
+        <Tab text="Habitaciones" closable="false">
             <VBox spacing="15">
-                <Label text="Configuración de Usuario" styleClass="subtitulo-seccion"/>
+                <Label text="Gestión de Habitaciones" styleClass="subtitulo-seccion"/>
                 
                 <GridPane vgap="10" hgap="10">
-                    <Label text="Cambiar Contraseña:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                    <PasswordField fx:id="passwordActualField" promptText="Contraseña Actual" 
-                                 GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label text="Número:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <TextField fx:id="numeroHabitacionField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                     
-                    <PasswordField fx:id="nuevaPasswordField" promptText="Nueva Contraseña" 
-                                 GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label text="Tipo:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <ComboBox fx:id="tipoHabitacionComboBox" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
                     
-                    <PasswordField fx:id="confirmarPasswordField" promptText="Confirmar Contraseña" 
-                                 GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <Label text="Tarifa por hora:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <TextField fx:id="tarifaField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    
+                    <Label text="Características:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <TextArea fx:id="caracteristicasArea" 
+                             GridPane.rowIndex="3" 
+                             GridPane.columnIndex="1"
+                             prefRowCount="3"/>
                 </GridPane>
                 
-                <Button text="Cambiar Contraseña" styleClass="boton-primario"/>
+                <HBox spacing="10">
+                    <Button text="Crear Habitación" 
+                            onAction="#crearHabitacion" 
+                            styleClass="boton-primario"/>
+                </HBox>
+                
+                <TableView fx:id="habitacionesTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="numeroColumn" text="Número" prefWidth="100"/>
+                        <TableColumn fx:id="tipoColumn" text="Tipo" prefWidth="100"/>
+                        <TableColumn fx:id="tarifaColumn" text="Tarifa" prefWidth="100"/>
+                        <TableColumn fx:id="estadoColumn" text="Estado" prefWidth="100"/>
+                    </columns>
+                </TableView>
             </VBox>
         </Tab>
         
-        <Tab text="Sistema">
+        <!-- Pestaña de Sistema -->
+        <Tab text="Sistema" closable="false">
             <VBox spacing="15">
-                <Label text="Configuración del Sistema" styleClass="subtitulo-seccion"/>
+                <Label text="Respaldo del Sistema" styleClass="subtitulo-seccion"/>
                 
                 <VBox spacing="10">
-                    <CheckBox text="Iniciar automáticamente con Windows"/>
-                    <CheckBox text="Minimizar a la bandeja del sistema"/>
-                    <CheckBox text="Mostrar notificaciones"/>
-                </VBox>
-                
-                <VBox spacing="10">
-                    <Label text="Respaldo de Base de Datos"/>
-                    <HBox spacing="10">
-                        <Button text="Crear Respaldo" styleClass="boton-secundario"/>
-                        <Button text="Restaurar Respaldo" styleClass="boton-secundario"/>
-                    </HBox>
+                    <Button text="Crear Backup" 
+                            onAction="#crearBackup" 
+                            styleClass="boton-primario"/>
+                    
+                    <Label text="El backup se guardará en la carpeta 'backup' del sistema" 
+                           styleClass="texto-info"/>
                 </VBox>
             </VBox>
         </Tab>

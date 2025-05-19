@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.ExportController"
+      spacing="15"
+      padding="20">
+
+    <Label text="Exportar Datos" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <padding>
+            <Insets top="10" bottom="10"/>
+        </padding>
+
+        <Label text="Fecha Inicio:" 
+               GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <DatePicker fx:id="fechaInicioPicker" 
+                    GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Fecha Fin:" 
+               GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <DatePicker fx:id="fechaFinPicker" 
+                    GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    </GridPane>
+
+    <VBox spacing="10">
+        <Label text="Seleccione los datos a exportar:"/>
+        <CheckBox fx:id="exportarTransaccionesCheck" 
+                  text="Exportar Transacciones"/>
+        <CheckBox fx:id="exportarReservasCheck" 
+                  text="Exportar Reservas"/>
+    </VBox>
+
+    <Label fx:id="statusLabel" 
+           wrapText="true" 
+           style="-fx-text-fill: red;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancelar" 
+                onAction="#cancelar" 
+                style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+        <Button fx:id="exportarButton" 
+                text="Exportar" 
+                onAction="#exportar" 
+                style="-fx-background-color: #28a745; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>
