@@ -7,179 +7,123 @@ package com.elencanto.app.controller;
 import com.elencanto.app.dao.TransaccionDAO;
 import com.elencanto.app.model.Transaccion;
 import com.elencanto.app.model.Transaccion.TipoTransaccion;
-import com.elencanto.app.util.SessionManager;
 import javafx.fxml.FXML;
+import javafx.scene.chart.LineChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class FinanzasController {
     private static final Logger logger = Logger.getLogger(FinanzasController.class.getName());
 
     @FXML
-    private DatePicker fechaPicker;
+    private DatePicker fechaSelector;
     
     @FXML
-    private Label totalIngresosLabel;
+    private Label ingresosDiaLabel;
     
     @FXML
-    private Label totalEgresosLabel;
+    private Label egresosDiaLabel;
     
     @FXML
-    private Label balanceLabel;
+    private Label balanceDiaLabel;
     
     @FXML
-    private TableView<Transaccion> ingresosTable;
+    private Button agregarIngresoButton;
     
     @FXML
-    private TableView<Transaccion> egresosTable;
+    private Button agregarEgresoButton;
     
     @FXML
-    private TextField conceptoField;
+    private VBox ingresosContainer;
     
     @FXML
-    private TextField montoField;
+    private VBox egresosContainer;
     
     @FXML
-    private ComboBox<TipoTransaccion> tipoComboBox;
+    private LineChart<String, Number> lineChart; // Deberías agregar fx:id al LineChart en el FXML
 
     private TransaccionDAO transaccionDAO;
 
     @FXML
     public void initialize() {
-        transaccionDAO = new TransaccionDAO();
-        fechaPicker.setValue(LocalDate.now());
-        configurarComboBox();
-        configurarTablas();
-        
-        // Agregar listener para actualizar datos cuando cambie la fecha
-        fechaPicker.valueProperty().addListener((obs, oldVal, newVal) -> actualizarDatos());
-        
-        actualizarDatos();
-    }
-
-    private void actualizarDatos() {
         try {
-            LocalDate fecha = fechaPicker.getValue();
+            // Inicializar DAO
+            transaccionDAO = new TransaccionDAO();
             
+            // Configurar fecha actual
+            fechaSelector.setValue(LocalDate.now());
+            
+            // Agregar listener para cambios de fecha
+            fechaSelector.valueProperty().addListener((obs, oldVal, newVal) -> cargarDatos(newVal));
+            
+            // Configurar botones
+            agregarIngresoButton.setOnAction(e -> mostrarDialogoNuevaTransaccion(TipoTransaccion.INGRESO));
+            agregarEgresoButton.setOnAction(e -> mostrarDialogoNuevaTransaccion(TipoTransaccion.EGRESO));
+            
+            // Cargar datos iniciales
+            cargarDatos(fechaSelector.getValue());
+            
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al inicializar controlador de finanzas", e);
+            mostrarAlerta("Error", "No se pudo inicializar el módulo de finanzas");
+        }
+    }
+    
+    private void cargarDatos(LocalDate fecha) {
+        try {
             // Calcular totales
-            BigDecimal totalIngresos = transaccionDAO.calcularTotalPorTipoYFecha(TipoTransaccion.INGRESO, fecha);
-            BigDecimal totalEgresos = transaccionDAO.calcularTotalPorTipoYFecha(TipoTransaccion.EGRESO, fecha);
-            BigDecimal balance = totalIngresos.subtract(totalEgresos);
+            BigDecimal ingresos = transaccionDAO.calcularTotalPorTipoYFecha(TipoTransaccion.INGRESO, fecha);
+            BigDecimal egresos = transaccionDAO.calcularTotalPorTipoYFecha(TipoTransaccion.EGRESO, fecha);
+            BigDecimal balance = ingresos.subtract(egresos);
             
-            // Actualizar labels
-            totalIngresosLabel.setText(String.format("Ingresos: $%.2f", totalIngresos));
-            totalEgresosLabel.setText(String.format("Egresos: $%.2f", totalEgresos));
-            balanceLabel.setText(String.format("Balance: $%.2f", balance));
+            // Actualizar etiquetas
+            ingresosDiaLabel.setText("$" + ingresos.toString());
+            egresosDiaLabel.setText("$" + egresos.toString());
+            balanceDiaLabel.setText("$" + balance.toString());
             
             // Cargar transacciones
-            cargarTransacciones();
+            cargarTransacciones(fecha);
             
         } catch (SQLException e) {
-            logger.severe("Error al actualizar datos financieros: " + e.getMessage());
+            logger.log(Level.SEVERE, "Error al cargar datos financieros", e);
             mostrarAlerta("Error", "No se pudieron cargar los datos financieros");
         }
     }
-
-    private void cargarTransacciones() {
-        try {
-            LocalDate fecha = fechaPicker.getValue();
-            
-            // Cargar ingresos
-            List<Transaccion> ingresos = transaccionDAO.listarPorTipoYFecha(TipoTransaccion.INGRESO, fecha);
-            ingresosTable.setItems(FXCollections.observableArrayList(ingresos));
-            
-            // Cargar egresos
-            List<Transaccion> egresos = transaccionDAO.listarPorTipoYFecha(TipoTransaccion.EGRESO, fecha);
-            egresosTable.setItems(FXCollections.observableArrayList(egresos));
-            
-        } catch (SQLException e) {
-            logger.severe("Error al cargar transacciones: " + e.getMessage());
-            mostrarAlerta("Error", "No se pudieron cargar las transacciones");
+    
+    private void cargarTransacciones(LocalDate fecha) throws SQLException {
+        // Limpiar contenedores
+        ingresosContainer.getChildren().clear();
+        egresosContainer.getChildren().clear();
+        
+        // Cargar ingresos
+        for (Transaccion t : transaccionDAO.listarPorTipoYFecha(TipoTransaccion.INGRESO, fecha)) {
+            Label label = new Label(t.getConcepto() + ": $" + t.getMonto());
+            ingresosContainer.getChildren().add(label);
+        }
+        
+        // Cargar egresos
+        for (Transaccion t : transaccionDAO.listarPorTipoYFecha(TipoTransaccion.EGRESO, fecha)) {
+            Label label = new Label(t.getConcepto() + ": $" + t.getMonto());
+            egresosContainer.getChildren().add(label);
         }
     }
-
-    @FXML
-    private void registrarTransaccion() {
-        try {
-            if (!validarCampos()) {
-                return;
-            }
-
-            Transaccion transaccion = new Transaccion();
-            transaccion.setTipo(tipoComboBox.getValue());
-            transaccion.setConcepto(conceptoField.getText());
-            transaccion.setMonto(new BigDecimal(montoField.getText()));
-            transaccion.setFecha(LocalDateTime.now());
-            transaccion.setUsuarioId(SessionManager.getInstance().getUsuarioActual().getId());
-
-            if (transaccionDAO.agregarTransaccion(transaccion)) {
-                mostrarAlerta("Éxito", "Transacción registrada correctamente");
-                limpiarCampos();
-                actualizarDatos();
-            } else {
-                mostrarAlerta("Error", "No se pudo registrar la transacción");
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al registrar transacción: " + e.getMessage());
-            mostrarAlerta("Error", "Error al registrar la transacción");
-        }
-    }
-
-    private boolean validarCampos() {
-        if (tipoComboBox.getValue() == null) {
-            mostrarAlerta("Error", "Debe seleccionar un tipo de transacción");
-            return false;
-        }
-
-        if (conceptoField.getText().isEmpty()) {
-            mostrarAlerta("Error", "Debe ingresar un concepto");
-            return false;
-        }
-
-        if (montoField.getText().isEmpty()) {
-            mostrarAlerta("Error", "Debe ingresar un monto");
-            return false;
-        }
-
-        try {
-            BigDecimal monto = new BigDecimal(montoField.getText());
-            if (monto.compareTo(BigDecimal.ZERO) <= 0) {
-                mostrarAlerta("Error", "El monto debe ser mayor a 0");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            mostrarAlerta("Error", "El monto debe ser un número válido");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void configurarComboBox() {
-        tipoComboBox.setItems(FXCollections.observableArrayList(TipoTransaccion.values()));
-    }
-
-    private void configurarTablas() {
-        // Configurar columnas de la tabla de ingresos
-        // ... (código de configuración de columnas)
-    }
-
-    private void limpiarCampos() {
-        tipoComboBox.setValue(null);
-        conceptoField.clear();
-        montoField.clear();
-    }
-
-    private void mostrarAlerta(String titulo, String mensaje) {
+    
+    private void mostrarDialogoNuevaTransaccion(TipoTransaccion tipo) {
+        // Implementación básica para mostrar diálogo de nueva transacción
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Nueva " + (tipo == TipoTransaccion.INGRESO ? "Ingreso" : "Egreso"));
+        alert.setHeaderText(null);
+        alert.setContentText("Funcionalidad en desarrollo");
+        alert.showAndWait();
+    }
+    
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
