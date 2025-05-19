@@ -1,67 +1,52 @@
 package com.elencanto.app.util;
 
 import java.sql.Connection;
-import java.sql.Statement;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
-/**
- * Utilidad para operaciones relacionadas con la base de datos
- */
 public class DatabaseUtil {
     private static final Logger logger = Logger.getLogger(DatabaseUtil.class.getName());
-    
-    /**
-     * Ejecuta un script SQL
-     */
-    public static boolean ejecutarScript(String script) {
-        Connection connection = null;
-        Statement statement = null;
+    private static final String URL = "jdbc:mysql://localhost:3306/elencanto_db";
+    private static final String USER = "root";
+    private static final String PASSWORD = "root"; // Cambia esto por tu contraseña
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+
+    public static boolean crearBackup() {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String backupPath = "backup/database_" + timestamp + ".sql";
         
         try {
-            connection = DatabaseConnection.getInstance().getConnection();
-            statement = connection.createStatement();
+            // Asegurar que el directorio de backup existe
+            Files.createDirectories(Paths.get("backup"));
             
-            String[] queries = script.split(";");
+            // Comando para crear el backup
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                "mysqldump",
+                "-u" + USER,
+                "-p" + PASSWORD,
+                "elencanto_db"
+            );
             
-            for (String query : queries) {
-                if (!query.trim().isEmpty()) {
-                    statement.executeUpdate(query);
-                }
-            }
+            File backupFile = new File(backupPath);
+            processBuilder.redirectOutput(backupFile);
             
-            return true;
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+            
+            return exitCode == 0;
         } catch (Exception e) {
-            logger.severe("Error al ejecutar script SQL: " + e.getMessage());
+            logger.severe("Error al crear backup: " + e.getMessage());
             return false;
-        } finally {
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-            } catch (Exception e) {
-                logger.severe("Error al cerrar statement: " + e.getMessage());
-            }
         }
-    }
-    
-    /**
-     * Crea un backup de la base de datos
-     */
-    public static boolean crearBackup() {
-        // Implementa la lógica para crear un backup
-        // Esta es una implementación básica, deberás adaptarla a tus necesidades
-        logger.info("Creando backup de la base de datos...");
-        return true;
-    }
-    
-    /**
-     * Restaura un backup de la base de datos
-     */
-    public static boolean restaurarBackup(String backupFile) {
-        // Implementa la lógica para restaurar un backup
-        // Esta es una implementación básica, deberás adaptarla a tus necesidades
-        logger.info("Restaurando backup: " + backupFile);
-        return true;
     }
 }
                     

@@ -6,39 +6,26 @@ package com.elencanto.app.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-/**
- *
- * @author Gopar117
- */
+
 public class Transaccion {
-    
     private Long id;
     private TipoTransaccion tipo;
     private String concepto;
     private BigDecimal monto;
     private LocalDateTime fecha;
-    private Usuario usuario;
-    private Reserva reserva; // Puede ser null si no está asociada
-    
+    private Long usuarioId;
+    private Long reservaId;
+
     public enum TipoTransaccion {
-        INGRESO, EGRESO
+        INGRESO,
+        EGRESO
     }
-    
+
     // Constructor
-    public Transaccion(Long id, TipoTransaccion tipo, String concepto, BigDecimal monto, 
-                      LocalDateTime fecha, Usuario usuario, Reserva reserva) {
-        this.id = id;
-        this.tipo = tipo;
-        this.concepto = concepto;
-        this.monto = monto;
-        this.fecha = fecha;
-        this.usuario = usuario;
-        this.reserva = reserva;
+    public Transaccion() {
+        this.fecha = LocalDateTime.now();
     }
-    
-    // Constructor vacío
-    public Transaccion() {}
-    
+
     // Getters y Setters
     public Long getId() {
         return id;
@@ -54,6 +41,10 @@ public class Transaccion {
 
     public void setTipo(TipoTransaccion tipo) {
         this.tipo = tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = TipoTransaccion.valueOf(tipo);
     }
 
     public String getConcepto() {
@@ -80,30 +71,19 @@ public class Transaccion {
         this.fecha = fecha;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
-    public Reserva getReserva() {
-        return reserva;
+    public Long getReservaId() {
+        return reservaId;
     }
 
-    public void setReserva(Reserva reserva) {
-        this.reserva = reserva;
-    }
-    
-    @Override
-    public String toString() {
-        return "Transaccion{" +
-                "id=" + id +
-                ", tipo=" + tipo +
-                ", concepto='" + concepto + '\'' +
-                ", monto=" + monto +
-                ", fecha=" + fecha +
-                '}';
+    public void setReservaId(Long reservaId) {
+        this.reservaId = reservaId;
     }
 }

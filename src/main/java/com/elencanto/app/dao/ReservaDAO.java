@@ -4,212 +4,159 @@
  */
 package com.elencanto.app.dao;
 
-import com.elencanto.app.model.Habitacion;
 import com.elencanto.app.model.Reserva;
-import com.elencanto.app.util.DatabaseConnection;
-
+import com.elencanto.app.util.DatabaseUtil;
 import java.sql.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
-/**
- *
- * @author Gopar117
- */
+
 public class ReservaDAO {
     private static final Logger logger = Logger.getLogger(ReservaDAO.class.getName());
-    private Connection connection;
-    private HabitacionDAO habitacionDAO;
-    
-    public ReservaDAO() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
-        this.habitacionDAO = new HabitacionDAO();
-    }
-    
-    public boolean agregarReserva(Reserva reserva) {
+
+    public boolean crear(Reserva reserva) throws SQLException {
         String sql = "INSERT INTO reservas (habitacion_id, check_in, check_out, total_pagado, estado) VALUES (?, ?, ?, ?, ?)";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setLong(1, reserva.getHabitacion().getId());
-            pstmt.setTimestamp(2, Timestamp.valueOf(reserva.getCheckIn()));
-            pstmt.setTimestamp(3, Timestamp.valueOf(reserva.getCheckOut()));
-            pstmt.setBigDecimal(4, reserva.getTotalPagado());
-            pstmt.setString(5, reserva.getEstado().toString());
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            int affectedRows = pstmt.executeUpdate();
+            stmt.setLong(1, reserva.getHabitacionId());
+            stmt.setTimestamp(2, Timestamp.valueOf(reserva.getCheckIn()));
+            stmt.setTimestamp(3, Timestamp.valueOf(reserva.getCheckOut()));
+            stmt.setBigDecimal(4, reserva.getTotalPagado());
+            stmt.setString(5, reserva.getEstado().name());
             
-            if (affectedRows == 0) {
-                return false;
-            }
+            int affectedRows = stmt.executeUpdate();
             
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    reserva.setId(generatedKeys.getLong(1));
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        reserva.setId(generatedKeys.getLong(1));
+                        return true;
+                    }
                 }
             }
-            
-            return true;
-        } catch (SQLException e) {
-            logger.severe("Error al agregar reserva: " + e.getMessage());
-            return false;
         }
+        return false;
     }
-    
-    public Optional<Reserva> buscarPorId(Long id) {
-        String sql = "SELECT * FROM reservas WHERE id = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setLong(1, id);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToReserva(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al buscar reserva: " + e.getMessage());
-        }
-        
-        return Optional.empty();
-    }
-    
-    public List<Reserva> listarTodas() {
+
+    public List<Reserva> obtenerTodas() throws SQLException {
         List<Reserva> reservas = new ArrayList<>();
         String sql = "SELECT * FROM reservas ORDER BY check_in DESC";
         
-        try (Statement stmt = connection.createStatement();
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
             while (rs.next()) {
-                reservas.add(mapResultSetToReserva(rs));
+                reservas.add(mapearReserva(rs));
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar reservas: " + e.getMessage());
         }
         
         return reservas;
     }
-    
-    public List<Reserva> listarPorEstado(Reserva.EstadoReserva estado) {
+
+    public List<Reserva> obtenerReservasActivas() throws SQLException {
         List<Reserva> reservas = new ArrayList<>();
-        String sql = "SELECT * FROM reservas WHERE estado = ? ORDER BY check_in DESC";
+        String sql = "SELECT * FROM reservas WHERE estado = 'ACTIVA' ORDER BY check_in DESC";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, estado.toString());
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
             
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    reservas.add(mapResultSetToReserva(rs));
-                }
+            while (rs.next()) {
+                reservas.add(mapearReserva(rs));
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar reservas por estado: " + e.getMessage());
         }
         
         return reservas;
     }
-    
-    public List<Reserva> listarPorFecha(LocalDateTime inicio, LocalDateTime fin) {
+
+    /**
+     * Obtiene todas las reservas realizadas dentro del rango de fechas especificado.
+     * 
+     * @param inicio Fecha y hora de inicio del rango
+     * @param fin Fecha y hora de fin del rango
+     * @return Lista de reservas dentro del rango especificado
+     * @throws SQLException Si ocurre un error en la consulta a la base de datos
+     */
+    public List<Reserva> obtenerPorRangoFechas(LocalDateTime inicio, LocalDateTime fin) throws SQLException {
         List<Reserva> reservas = new ArrayList<>();
-        String sql = "SELECT * FROM reservas WHERE check_in BETWEEN ? AND ? ORDER BY check_in";
+        String sql = "SELECT * FROM reservas WHERE check_in BETWEEN ? AND ? ORDER BY check_in DESC";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, Timestamp.valueOf(inicio));
-            pstmt.setTimestamp(2, Timestamp.valueOf(fin));
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            try (ResultSet rs = pstmt.executeQuery()) {
+            stmt.setTimestamp(1, Timestamp.valueOf(inicio));
+            stmt.setTimestamp(2, Timestamp.valueOf(fin));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    reservas.add(mapResultSetToReserva(rs));
+                    reservas.add(mapearReserva(rs));
                 }
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar reservas por fecha: " + e.getMessage());
         }
         
         return reservas;
     }
-    
-    public boolean actualizarReserva(Reserva reserva) {
-        String sql = "UPDATE reservas SET habitacion_id = ?, check_in = ?, check_out = ?, " +
-                    "total_pagado = ?, estado = ? WHERE id = ?";
+
+    public int contarReservasPorRango(LocalDateTime inicio, LocalDateTime fin) throws SQLException {
+        String sql = "SELECT COUNT(*) as total FROM reservas WHERE check_in BETWEEN ? AND ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setLong(1, reserva.getHabitacion().getId());
-            pstmt.setTimestamp(2, Timestamp.valueOf(reserva.getCheckIn()));
-            pstmt.setTimestamp(3, Timestamp.valueOf(reserva.getCheckOut()));
-            pstmt.setBigDecimal(4, reserva.getTotalPagado());
-            pstmt.setString(5, reserva.getEstado().toString());
-            pstmt.setLong(6, reserva.getId());
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLException e) {
-            logger.severe("Error al actualizar reserva: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    public BigDecimal calcularIngresosPorFecha(LocalDateTime inicio, LocalDateTime fin) {
-        String sql = "SELECT SUM(total_pagado) FROM reservas WHERE check_in BETWEEN ? AND ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, Timestamp.valueOf(inicio));
-            pstmt.setTimestamp(2, Timestamp.valueOf(fin));
+            stmt.setTimestamp(1, Timestamp.valueOf(inicio));
+            stmt.setTimestamp(2, Timestamp.valueOf(fin));
             
-            try (ResultSet rs = pstmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    BigDecimal resultado = rs.getBigDecimal(1);
-                    return resultado != null ? resultado : BigDecimal.ZERO;
+                    return rs.getInt("total");
                 }
             }
-        } catch (SQLException e) {
-            logger.severe("Error al calcular ingresos: " + e.getMessage());
         }
-        
-        return BigDecimal.ZERO;
-    }
-    
-    public int contarReservasPorRango(LocalDateTime inicio, LocalDateTime fin) {
-        String sql = "SELECT COUNT(*) FROM reservas WHERE check_in BETWEEN ? AND ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, Timestamp.valueOf(inicio));
-            pstmt.setTimestamp(2, Timestamp.valueOf(fin));
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al contar reservas por rango: " + e.getMessage());
-        }
-        
         return 0;
     }
-    
-    private Reserva mapResultSetToReserva(ResultSet rs) throws SQLException {
+
+    public Reserva obtenerPorId(Long id) throws SQLException {
+        String sql = "SELECT * FROM reservas WHERE id = ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setLong(1, id);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearReserva(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean actualizarEstado(Long id, Reserva.EstadoReserva estado) throws SQLException {
+        String sql = "UPDATE reservas SET estado = ? WHERE id = ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, estado.name());
+            stmt.setLong(2, id);
+            
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    private Reserva mapearReserva(ResultSet rs) throws SQLException {
         Reserva reserva = new Reserva();
         reserva.setId(rs.getLong("id"));
-        
-        // Obtener habitación
-        Long habitacionId = rs.getLong("habitacion_id");
-        Optional<Habitacion> habitacionOpt = habitacionDAO.buscarPorId(habitacionId);
-        
-        if (habitacionOpt.isPresent()) {
-            reserva.setHabitacion(habitacionOpt.get());
-        } else {
-            logger.warning("No se encontró habitación con ID " + habitacionId);
-        }
-        
+        reserva.setHabitacionId(rs.getLong("habitacion_id"));
         reserva.setCheckIn(rs.getTimestamp("check_in").toLocalDateTime());
         reserva.setCheckOut(rs.getTimestamp("check_out").toLocalDateTime());
         reserva.setTotalPagado(rs.getBigDecimal("total_pagado"));
-        reserva.setEstado(Reserva.EstadoReserva.valueOf(rs.getString("estado")));
-        
+        reserva.setEstado(rs.getString("estado"));
         return reserva;
     }
 }

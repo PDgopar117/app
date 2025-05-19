@@ -5,188 +5,94 @@
 package com.elencanto.app.dao;
 
 import com.elencanto.app.model.Habitacion;
-import com.elencanto.app.util.DatabaseConnection;
-
+import com.elencanto.app.model.TipoHabitacion;
+import com.elencanto.app.model.EstadoHabitacion;
+import com.elencanto.app.util.DatabaseUtil;
 import java.sql.*;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Logger;
-/**
- *
- * @author Gopar117
- */
+
 public class HabitacionDAO {
     private static final Logger logger = Logger.getLogger(HabitacionDAO.class.getName());
-    private Connection connection;
-    
-    public HabitacionDAO() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
-    }
-    
-    public boolean agregarHabitacion(Habitacion habitacion) {
+
+    public boolean crearHabitacion(Habitacion habitacion) throws SQLException {
         String sql = "INSERT INTO habitaciones (numero, tipo, estado, tarifa, caracteristicas) VALUES (?, ?, ?, ?, ?)";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, habitacion.getNumero());
-            pstmt.setString(2, habitacion.getTipo().toString());
-            pstmt.setString(3, habitacion.getEstado().toString());
-            pstmt.setBigDecimal(4, habitacion.getTarifa());
-            pstmt.setString(5, habitacion.getCaracteristicas());
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            int affectedRows = pstmt.executeUpdate();
+            stmt.setString(1, habitacion.getNumero());
+            stmt.setString(2, habitacion.getTipo().name());
+            stmt.setString(3, habitacion.getEstado().name());
+            stmt.setDouble(4, habitacion.getTarifa());
+            stmt.setString(5, habitacion.getCaracteristicas());
             
-            if (affectedRows == 0) {
-                return false;
-            }
-            
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    habitacion.setId(generatedKeys.getLong(1));
-                }
-            }
-            
-            return true;
-        } catch (SQLException e) {
-            logger.severe("Error al agregar habitación: " + e.getMessage());
-            return false;
+            return stmt.executeUpdate() > 0;
         }
     }
-    
-    public Optional<Habitacion> buscarPorId(Long id) {
+
+    public Optional<Habitacion> buscarPorId(Long id) throws SQLException {
         String sql = "SELECT * FROM habitaciones WHERE id = ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setLong(1, id);
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            try (ResultSet rs = pstmt.executeQuery()) {
+            stmt.setLong(1, id);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return Optional.of(mapResultSetToHabitacion(rs));
+                    Habitacion habitacion = new Habitacion();
+                    habitacion.setId(rs.getLong("id"));
+                    habitacion.setNumero(rs.getString("numero"));
+                    habitacion.setTipo(TipoHabitacion.valueOf(rs.getString("tipo")));
+                    habitacion.setEstado(EstadoHabitacion.valueOf(rs.getString("estado")));
+                    habitacion.setTarifa(rs.getDouble("tarifa"));
+                    habitacion.setCaracteristicas(rs.getString("caracteristicas"));
+                    return Optional.of(habitacion);
                 }
             }
-        } catch (SQLException e) {
-            logger.severe("Error al buscar habitación por ID: " + e.getMessage());
         }
-        
         return Optional.empty();
     }
-    
-    public Optional<Habitacion> buscarPorNumero(String numero) {
-        String sql = "SELECT * FROM habitaciones WHERE numero = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, numero);
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToHabitacion(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al buscar habitación: " + e.getMessage());
-        }
-        
-        return Optional.empty();
-    }
-    
-    public List<Habitacion> listarTodas() {
+
+    public List<Habitacion> obtenerTodas() throws SQLException {
         List<Habitacion> habitaciones = new ArrayList<>();
-        String sql = "SELECT * FROM habitaciones ORDER BY numero";
+        String sql = "SELECT * FROM habitaciones";
         
-        try (Statement stmt = connection.createStatement();
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
             while (rs.next()) {
-                habitaciones.add(mapResultSetToHabitacion(rs));
+                Habitacion habitacion = new Habitacion();
+                habitacion.setId(rs.getLong("id"));
+                habitacion.setNumero(rs.getString("numero"));
+                habitacion.setTipo(TipoHabitacion.valueOf(rs.getString("tipo")));
+                habitacion.setEstado(EstadoHabitacion.valueOf(rs.getString("estado")));
+                habitacion.setTarifa(rs.getDouble("tarifa"));
+                habitacion.setCaracteristicas(rs.getString("caracteristicas"));
+                habitaciones.add(habitacion);
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar habitaciones: " + e.getMessage());
         }
-        
         return habitaciones;
     }
-    
-    public List<Habitacion> listarPorEstado(Habitacion.EstadoHabitacion estado) {
-        List<Habitacion> habitaciones = new ArrayList<>();
-        String sql = "SELECT * FROM habitaciones WHERE estado = ? ORDER BY numero";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, estado.toString());
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    habitaciones.add(mapResultSetToHabitacion(rs));
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al listar habitaciones por estado: " + e.getMessage());
-        }
-        
-        return habitaciones;
-    }
-    
-    public boolean actualizarHabitacion(Habitacion habitacion) {
+
+    public boolean actualizarHabitacion(Habitacion habitacion) throws SQLException {
         String sql = "UPDATE habitaciones SET numero = ?, tipo = ?, estado = ?, tarifa = ?, caracteristicas = ? WHERE id = ?";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, habitacion.getNumero());
-            pstmt.setString(2, habitacion.getTipo().toString());
-            pstmt.setString(3, habitacion.getEstado().toString());
-            pstmt.setBigDecimal(4, habitacion.getTarifa());
-            pstmt.setString(5, habitacion.getCaracteristicas());
-            pstmt.setLong(6, habitacion.getId());
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            int affectedRows = pstmt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLException e) {
-            logger.severe("Error al actualizar habitación: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    public int contarTotalHabitaciones() {
-        String sql = "SELECT COUNT(*) FROM habitaciones";
-        
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+            stmt.setString(1, habitacion.getNumero());
+            stmt.setString(2, habitacion.getTipo().name());
+            stmt.setString(3, habitacion.getEstado().name());
+            stmt.setDouble(4, habitacion.getTarifa());
+            stmt.setString(5, habitacion.getCaracteristicas());
+            stmt.setLong(6, habitacion.getId());
             
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al contar habitaciones: " + e.getMessage());
+            return stmt.executeUpdate() > 0;
         }
-        
-        return 0;
-    }
-    
-    public int contarHabitacionesPorEstado(Habitacion.EstadoHabitacion estado) {
-        String sql = "SELECT COUNT(*) FROM habitaciones WHERE estado = ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, estado.toString());
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al contar habitaciones por estado: " + e.getMessage());
-        }
-        
-        return 0;
-    }
-    
-    private Habitacion mapResultSetToHabitacion(ResultSet rs) throws SQLException {
-        Habitacion habitacion = new Habitacion();
-        habitacion.setId(rs.getLong("id"));
-        habitacion.setNumero(rs.getString("numero"));
-        habitacion.setTipo(Habitacion.TipoHabitacion.valueOf(rs.getString("tipo")));
-        habitacion.setEstado(Habitacion.EstadoHabitacion.valueOf(rs.getString("estado")));
-        habitacion.setTarifa(rs.getBigDecimal("tarifa"));
-        habitacion.setCaracteristicas(rs.getString("caracteristicas"));
-        return habitacion;
     }
 }

@@ -4,142 +4,161 @@
  */
 package com.elencanto.app.util;
 
-
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
+import com.elencanto.app.model.Transaccion;
+import com.elencanto.app.model.Reserva;
 import java.io.FileOutputStream;
-import java.time.LocalDate;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
-/**
- *
- * @author Gopar117
- */
 public class ExportUtil {
     private static final Logger logger = Logger.getLogger(ExportUtil.class.getName());
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     /**
-     * Exporta datos a un archivo Excel
-     * @param filePath Ruta del archivo
-     * @param sheetName Nombre de la hoja
-     * @param headers Encabezados de columnas
-     * @param data Datos a exportar (lista de arrays de objetos)
-     * @return true si la operación fue exitosa
+     * Exporta una lista de transacciones a un archivo Excel
+     * @param transacciones Lista de transacciones a exportar
+     * @param filePath Ruta del archivo donde se guardará el Excel
+     * @return true si la exportación fue exitosa, false en caso contrario
      */
-    public static boolean exportToExcel(String filePath, String sheetName, 
-                                     String[] headers, List<Object[]> data) {
+    public static boolean exportarTransaccionesAExcel(List<Transaccion> transacciones, String filePath) {
         try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet(sheetName);
+            Sheet sheet = workbook.createSheet("Transacciones");
             
-            // Crear estilos
+            // Crear estilo para el encabezado
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 12);
             headerStyle.setFont(headerFont);
-            headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             
-            // Crear fila de encabezados
+            // Crear encabezados
             Row headerRow = sheet.createRow(0);
-            for (int i = 0; i < headers.length; i++) {
+            String[] columns = {"ID", "Tipo", "Concepto", "Monto", "Fecha", "Usuario", "Reserva"};
+            for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers[i]);
+                cell.setCellValue(columns[i]);
                 cell.setCellStyle(headerStyle);
             }
             
-            // Crear filas de datos
+            // Llenar datos
             int rowNum = 1;
-            for (Object[] rowData : data) {
+            for (Transaccion transaccion : transacciones) {
                 Row row = sheet.createRow(rowNum++);
-                for (int i = 0; i < rowData.length; i++) {
-                    Cell cell = row.createCell(i);
-                    
-                    // Asignar valor según tipo
-                    if (rowData[i] instanceof String) {
-                        cell.setCellValue((String) rowData[i]);
-                    } else if (rowData[i] instanceof Integer) {
-                        cell.setCellValue((Integer) rowData[i]);
-                    } else if (rowData[i] instanceof Double) {
-                        cell.setCellValue((Double) rowData[i]);
-                    } else if (rowData[i] instanceof LocalDate) {
-                        cell.setCellValue(((LocalDate) rowData[i])
-                                .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                    } else if (rowData[i] != null) {
-                        cell.setCellValue(rowData[i].toString());
-                    }
+                
+                Cell cellId = row.createCell(0);
+                cellId.setCellValue(transaccion.getId());
+                
+                Cell cellTipo = row.createCell(1);
+                cellTipo.setCellValue(transaccion.getTipo().toString());
+                
+                Cell cellConcepto = row.createCell(2);
+                cellConcepto.setCellValue(transaccion.getConcepto());
+                
+                Cell cellMonto = row.createCell(3);
+                cellMonto.setCellValue(transaccion.getMonto().doubleValue());
+                
+                Cell cellFecha = row.createCell(4);
+                cellFecha.setCellValue(transaccion.getFecha().format(DATE_FORMATTER));
+                
+                Cell cellUsuario = row.createCell(5);
+                cellUsuario.setCellValue(transaccion.getUsuarioId());
+                
+                Cell cellReserva = row.createCell(6);
+                if (transaccion.getReservaId() != null) {
+                    cellReserva.setCellValue(transaccion.getReservaId());
                 }
             }
             
-            // Ajustar ancho de columnas
-            for (int i = 0; i < headers.length; i++) {
+            // Autoajustar columnas
+            for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }
             
-            // Escribir a archivo
-            try (FileOutputStream outputStream = new FileOutputStream(filePath)) {
-                workbook.write(outputStream);
+            // Escribir el archivo
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                workbook.write(fileOut);
+                return true;
             }
             
-            logger.info("Archivo Excel creado correctamente: " + filePath);
-            return true;
-        } catch (Exception e) {
-            logger.severe("Error al exportar a Excel: " + e.getMessage());
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error al exportar transacciones a Excel", e);
             return false;
         }
     }
     
     /**
-     * Exporta datos a un archivo CSV
-     * @param filePath Ruta del archivo
-     * @param headers Encabezados de columnas
-     * @param data Datos a exportar (lista de arrays de objetos)
-     * @return true si la operación fue exitosa
+     * Exporta una lista de reservas a un archivo Excel
+     * @param reservas Lista de reservas a exportar
+     * @param filePath Ruta del archivo donde se guardará el Excel
+     * @return true si la exportación fue exitosa, false en caso contrario
      */
-    public static boolean exportToCSV(String filePath, String[] headers, List<Object[]> data) {
-        try (FileOutputStream fos = new FileOutputStream(filePath);
-             java.io.OutputStreamWriter osw = new java.io.OutputStreamWriter(fos, "UTF-8")) {
+    public static boolean exportarReservasAExcel(List<Reserva> reservas, String filePath) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Reservas");
             
-            // Escribir encabezados
-            osw.write(String.join(",", headers) + "\n");
+            // Crear estilo para el encabezado
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 12);
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             
-            // Escribir datos
-            for (Object[] rowData : data) {
-                StringBuilder sb = new StringBuilder();
-                
-                for (int i = 0; i < rowData.length; i++) {
-                    String value = "";
-                    
-                    if (rowData[i] != null) {
-                        if (rowData[i] instanceof String) {
-                            // Escapar comillas y encerrar en comillas
-                            value = "\"" + ((String) rowData[i]).replace("\"", "\"\"") + "\"";
-                        } else if (rowData[i] instanceof LocalDate) {
-                            value = ((LocalDate) rowData[i])
-                                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-                        } else {
-                            value = rowData[i].toString();
-                        }
-                    }
-                    
-                    sb.append(value);
-                    
-                    if (i < rowData.length - 1) {
-                        sb.append(",");
-                    }
-                }
-                
-                osw.write(sb.toString() + "\n");
+            // Crear encabezados
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"ID", "Habitación", "Check-in", "Check-out", "Total Pagado", "Estado"};
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
             }
             
-            logger.info("Archivo CSV creado correctamente: " + filePath);
-            return true;
-        } catch (Exception e) {
-            logger.severe("Error al exportar a CSV: " + e.getMessage());
+            // Llenar datos
+            int rowNum = 1;
+            for (Reserva reserva : reservas) {
+                Row row = sheet.createRow(rowNum++);
+                
+                Cell cellId = row.createCell(0);
+                cellId.setCellValue(reserva.getId());
+                
+                Cell cellHabitacion = row.createCell(1);
+                cellHabitacion.setCellValue(reserva.getHabitacionId());
+                
+                Cell cellCheckIn = row.createCell(2);
+                cellCheckIn.setCellValue(reserva.getCheckIn().format(DATE_FORMATTER));
+                
+                Cell cellCheckOut = row.createCell(3);
+                cellCheckOut.setCellValue(reserva.getCheckOut().format(DATE_FORMATTER));
+                
+                Cell cellTotalPagado = row.createCell(4);
+                cellTotalPagado.setCellValue(reserva.getTotalPagado().doubleValue());
+                
+                Cell cellEstado = row.createCell(5);
+                cellEstado.setCellValue(reserva.getEstado().toString());
+            }
+            
+            // Autoajustar columnas
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
+            }
+            
+            // Escribir el archivo
+            try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+                workbook.write(fileOut);
+                return true;
+            }
+            
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error al exportar reservas a Excel", e);
             return false;
         }
     }
 }
-    

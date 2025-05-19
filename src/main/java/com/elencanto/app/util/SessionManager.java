@@ -5,42 +5,34 @@
 package com.elencanto.app.util;
 
 import com.elencanto.app.model.Usuario;
-/**
- *
- * @author Gopar117
- */
+import com.elencanto.app.model.Rol;
+
 public class SessionManager {
     private static SessionManager instance;
     private Usuario usuarioActual;
     
-    private SessionManager() {
-        // Constructor privado para Singleton
-    }
+    private SessionManager() {}
     
-    public static synchronized SessionManager getInstance() {
+    public static SessionManager getInstance() {
         if (instance == null) {
             instance = new SessionManager();
         }
         return instance;
     }
     
-    public Usuario getUsuarioActual() {
-        return usuarioActual;
-    }
-    
     public void setUsuarioActual(Usuario usuario) {
         this.usuarioActual = usuario;
     }
     
-    public boolean existeSesion() {
-        return usuarioActual != null;
+    public Usuario getUsuarioActual() {
+        return usuarioActual;
     }
     
     public void cerrarSesion() {
-        this.usuarioActual = null;
+        usuarioActual = null;
     }
     
-    public boolean tienePermisoAdmin() {
-        return usuarioActual != null && usuarioActual.getRol() == Usuario.Rol.ADMIN;
+    public boolean isAdmin() {
+        return usuarioActual != null && Rol.ADMIN.equals(usuarioActual.getRol());
     }
 }

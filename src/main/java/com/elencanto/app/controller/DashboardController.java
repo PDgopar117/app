@@ -105,19 +105,7 @@ public class DashboardController {
 
     @FXML
     private void handleConfiguracionClick() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("/fxml/Configuracion.fxml"));
-            Parent configuracionView = loader.load();
-            
-            contentArea.getChildren().clear();
-            contentArea.getChildren().add(configuracionView);
-            
-            actualizarMenuActivo("configuracionButton");
-        } catch (IOException e) {
-            logger.severe("Error al cargar la vista de configuración: " + e.getMessage());
-            mostrarAlerta("Error", "No se pudo cargar la configuración");
-        }
+        cargarVista("/fxml/Configuracion.fxml", "configuracionButton");
     }
 
     @FXML
@@ -139,7 +127,6 @@ public class DashboardController {
     }
 
     private void actualizarMenuActivo(String botonId) {
-        // Remover la clase activa de todos los botones
         dashboardButton.getStyleClass().remove("menu-item-activo");
         habitacionesButton.getStyleClass().remove("menu-item-activo");
         reservasButton.getStyleClass().remove("menu-item-activo");
@@ -147,7 +134,6 @@ public class DashboardController {
         reportesButton.getStyleClass().remove("menu-item-activo");
         configuracionButton.getStyleClass().remove("menu-item-activo");
         
-        // Agregar la clase activa al botón seleccionado
         switch (botonId) {
             case "dashboardButton":
                 dashboardButton.getStyleClass().add("menu-item-activo");

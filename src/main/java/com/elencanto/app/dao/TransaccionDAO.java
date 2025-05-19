@@ -4,191 +4,247 @@
  */
 package com.elencanto.app.dao;
 
-import com.elencanto.app.model.Reserva;
 import com.elencanto.app.model.Transaccion;
-import com.elencanto.app.model.Usuario;
-import com.elencanto.app.util.DatabaseConnection;
-
+import com.elencanto.app.model.Transaccion.TipoTransaccion;
+import com.elencanto.app.util.DatabaseUtil;
 import java.sql.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
+import java.math.BigDecimal;
 
-/**
- *
- * @author Gopar117
- */
 public class TransaccionDAO {
     private static final Logger logger = Logger.getLogger(TransaccionDAO.class.getName());
-    private Connection connection;
-    private UsuarioDAO usuarioDAO;
-    private ReservaDAO reservaDAO;
-    
+    private final UsuarioDAO usuarioDAO;
+
     public TransaccionDAO() {
-        this.connection = DatabaseConnection.getInstance().getConnection();
         this.usuarioDAO = new UsuarioDAO();
-        this.reservaDAO = new ReservaDAO();
     }
-    
-    public boolean agregarTransaccion(Transaccion transaccion) {
-        String sql = "INSERT INTO transacciones (tipo, concepto, monto, fecha, usuario_id, reserva_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+
+    public boolean crear(Transaccion transaccion) throws SQLException {
+        String sql = "INSERT INTO transacciones (tipo, concepto, monto, fecha, usuario_id, reserva_id) VALUES (?, ?, ?, ?, ?, ?)";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pstmt.setString(1, transaccion.getTipo().toString());
-            pstmt.setString(2, transaccion.getConcepto());
-            pstmt.setBigDecimal(3, transaccion.getMonto());
-            pstmt.setTimestamp(4, Timestamp.valueOf(transaccion.getFecha()));
-            pstmt.setLong(5, transaccion.getUsuario().getId());
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            if (transaccion.getReserva() != null) {
-                pstmt.setLong(6, transaccion.getReserva().getId());
+            stmt.setString(1, transaccion.getTipo().name());
+            stmt.setString(2, transaccion.getConcepto());
+            stmt.setBigDecimal(3, transaccion.getMonto());
+            stmt.setTimestamp(4, Timestamp.valueOf(transaccion.getFecha()));
+            stmt.setLong(5, transaccion.getUsuarioId());
+            if (transaccion.getReservaId() != null) {
+                stmt.setLong(6, transaccion.getReservaId());
             } else {
-                pstmt.setNull(6, Types.BIGINT);
+                stmt.setNull(6, Types.BIGINT);
             }
             
-            int affectedRows = pstmt.executeUpdate();
+            int affectedRows = stmt.executeUpdate();
             
-            if (affectedRows == 0) {
-                return false;
-            }
-            
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    transaccion.setId(generatedKeys.getLong(1));
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        transaccion.setId(generatedKeys.getLong(1));
+                        return true;
+                    }
                 }
             }
-            
-            return true;
-        } catch (SQLException e) {
-            logger.severe("Error al agregar transacción: " + e.getMessage());
-            return false;
         }
+        return false;
     }
-    
-    public List<Transaccion> listarPorFecha(LocalDate fecha) {
+
+    public List<Transaccion> obtenerTodas() throws SQLException {
         List<Transaccion> transacciones = new ArrayList<>();
+        String sql = "SELECT * FROM transacciones ORDER BY fecha DESC";
         
-        LocalDateTime inicioDia = fecha.atStartOfDay();
-        LocalDateTime finDia = fecha.atTime(23, 59, 59);
+        try (Connection conn = DatabaseUtil.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                transacciones.add(mapearTransaccion(rs));
+            }
+        }
         
+        return transacciones;
+    }
+
+    public List<Transaccion> obtenerPorFecha(Date fecha) throws SQLException {
+        List<Transaccion> transacciones = new ArrayList<>();
+        String sql = "SELECT * FROM transacciones WHERE DATE(fecha) = ? ORDER BY fecha DESC";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setDate(1, fecha);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    transacciones.add(mapearTransaccion(rs));
+                }
+            }
+        }
+        
+        return transacciones;
+    }
+
+    /**
+     * Obtiene todas las transacciones realizadas dentro del rango de fechas especificado.
+     * 
+     * @param inicio Fecha y hora de inicio del rango
+     * @param fin Fecha y hora de fin del rango
+     * @return Lista de transacciones dentro del rango especificado
+     * @throws SQLException Si ocurre un error en la consulta a la base de datos
+     */
+    public List<Transaccion> obtenerPorRangoFechas(LocalDateTime inicio, LocalDateTime fin) throws SQLException {
+        List<Transaccion> transacciones = new ArrayList<>();
         String sql = "SELECT * FROM transacciones WHERE fecha BETWEEN ? AND ? ORDER BY fecha DESC";
         
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setTimestamp(1, Timestamp.valueOf(inicioDia));
-            pstmt.setTimestamp(2, Timestamp.valueOf(finDia));
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            try (ResultSet rs = pstmt.executeQuery()) {
+            stmt.setTimestamp(1, Timestamp.valueOf(inicio));
+            stmt.setTimestamp(2, Timestamp.valueOf(fin));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    transacciones.add(mapResultSetToTransaccion(rs));
+                    transacciones.add(mapearTransaccion(rs));
                 }
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar transacciones por fecha: " + e.getMessage());
         }
         
         return transacciones;
     }
-    
-    public List<Transaccion> listarPorTipoYFecha(Transaccion.TipoTransaccion tipo, LocalDate fecha) {
+
+    public BigDecimal calcularTotalPorTipoYFecha(TipoTransaccion tipo, LocalDate fecha) throws SQLException {
+        String sql = "SELECT SUM(monto) as total FROM transacciones WHERE tipo = ? AND DATE(fecha) = ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, tipo.name());
+            stmt.setDate(2, Date.valueOf(fecha));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal total = rs.getBigDecimal("total");
+                    return total != null ? total : BigDecimal.ZERO;
+                }
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    public BigDecimal calcularTotalPorTipoYRango(TipoTransaccion tipo, LocalDateTime inicio, LocalDateTime fin) throws SQLException {
+        String sql = "SELECT SUM(monto) as total FROM transacciones WHERE tipo = ? AND fecha BETWEEN ? AND ?";
+        
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, tipo.name());
+            stmt.setTimestamp(2, Timestamp.valueOf(inicio));
+            stmt.setTimestamp(3, Timestamp.valueOf(fin));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    BigDecimal total = rs.getBigDecimal("total");
+                    return total != null ? total : BigDecimal.ZERO;
+                }
+            }
+        }
+        return BigDecimal.ZERO;
+    }
+
+    public List<Transaccion> listarPorTipoYFecha(TipoTransaccion tipo, LocalDate fecha) throws SQLException {
         List<Transaccion> transacciones = new ArrayList<>();
+        String sql = "SELECT * FROM transacciones WHERE tipo = ? AND DATE(fecha) = ? ORDER BY fecha DESC";
         
-        LocalDateTime inicioDia = fecha.atStartOfDay();
-        LocalDateTime finDia = fecha.atTime(23, 59, 59);
-        
-        String sql = "SELECT * FROM transacciones WHERE tipo = ? AND fecha BETWEEN ? AND ? ORDER BY fecha DESC";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, tipo.toString());
-            pstmt.setTimestamp(2, Timestamp.valueOf(inicioDia));
-            pstmt.setTimestamp(3, Timestamp.valueOf(finDia));
+        try (Connection conn = DatabaseUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            try (ResultSet rs = pstmt.executeQuery()) {
+            stmt.setString(1, tipo.name());
+            stmt.setDate(2, Date.valueOf(fecha));
+            
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    transacciones.add(mapResultSetToTransaccion(rs));
+                    transacciones.add(mapearTransaccion(rs));
                 }
             }
-        } catch (SQLException e) {
-            logger.severe("Error al listar transacciones por tipo y fecha: " + e.getMessage());
         }
         
         return transacciones;
     }
-    
-    public BigDecimal calcularTotalPorTipoYFecha(Transaccion.TipoTransaccion tipo, LocalDate fecha) {
-        LocalDateTime inicioDia = fecha.atStartOfDay();
-        LocalDateTime finDia = fecha.atTime(23, 59, 59);
-        
-        String sql = "SELECT SUM(monto) FROM transacciones WHERE tipo = ? AND fecha BETWEEN ? AND ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, tipo.toString());
-            pstmt.setTimestamp(2, Timestamp.valueOf(inicioDia));
-            pstmt.setTimestamp(3, Timestamp.valueOf(finDia));
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    BigDecimal resultado = rs.getBigDecimal(1);
-                    return resultado != null ? resultado : BigDecimal.ZERO;
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al calcular total por tipo y fecha: " + e.getMessage());
-        }
-        
-        return BigDecimal.ZERO;
-    }
-    
-    public BigDecimal calcularTotalPorTipoYRango(Transaccion.TipoTransaccion tipo, LocalDateTime inicio, LocalDateTime fin) {
-        String sql = "SELECT SUM(monto) FROM transacciones WHERE tipo = ? AND fecha BETWEEN ? AND ?";
-        
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, tipo.toString());
-            pstmt.setTimestamp(2, Timestamp.valueOf(inicio));
-            pstmt.setTimestamp(3, Timestamp.valueOf(fin));
-            
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    BigDecimal resultado = rs.getBigDecimal(1);
-                    return resultado != null ? resultado : BigDecimal.ZERO;
-                }
-            }
-        } catch (SQLException e) {
-            logger.severe("Error al calcular total por tipo y rango: " + e.getMessage());
-        }
-        
-        return BigDecimal.ZERO;
-    }
-    
-    private Transaccion mapResultSetToTransaccion(ResultSet rs) throws SQLException {
+
+    private Transaccion mapearTransaccion(ResultSet rs) throws SQLException {
         Transaccion transaccion = new Transaccion();
         transaccion.setId(rs.getLong("id"));
-        transaccion.setTipo(Transaccion.TipoTransaccion.valueOf(rs.getString("tipo")));
+        transaccion.setTipo(TipoTransaccion.valueOf(rs.getString("tipo")));
         transaccion.setConcepto(rs.getString("concepto"));
         transaccion.setMonto(rs.getBigDecimal("monto"));
         transaccion.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
+        transaccion.setUsuarioId(rs.getLong("usuario_id"));
         
-        // Obtener usuario
-        Long usuarioId = rs.getLong("usuario_id");
-        Optional<Usuario> usuarioOpt = usuarioDAO.buscarPorId(usuarioId);
-        
-        if (usuarioOpt.isPresent()) {
-            transaccion.setUsuario(usuarioOpt.get());
-        } else {
-            logger.warning("No se encontró usuario con ID " + usuarioId);
-        }
-        
-        // Obtener reserva (si existe)
         Long reservaId = rs.getLong("reserva_id");
         if (!rs.wasNull()) {
-            Optional<Reserva> reservaOpt = reservaDAO.buscarPorId(reservaId);
-            reservaOpt.ifPresent(transaccion::setReserva);
+            transaccion.setReservaId(reservaId);
         }
         
         return transaccion;
+    }
+
+    public boolean agregarTransaccion(Transaccion transaccion) throws SQLException {
+        return crear(transaccion);
+    }
+
+    public void procesarTransaccion(Transaccion transaccion) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DatabaseUtil.getConnection();
+            conn.setAutoCommit(false);
+            
+            // Verificar usuario
+            if (usuarioDAO.buscarPorId(transaccion.getUsuarioId()) == null) {
+                throw new SQLException("Usuario no encontrado");
+            }
+
+            // Crear la transacción
+            if (!crear(transaccion)) {
+                throw new SQLException("No se pudo crear la transacción");
+            }
+
+            // Si es una transacción relacionada con una reserva, actualizar la reserva
+            if (transaccion.getReservaId() != null) {
+                String updateReservaSql = "UPDATE reservas SET total_pagado = total_pagado + ? WHERE id = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(updateReservaSql)) {
+                    stmt.setBigDecimal(1, transaccion.getMonto());
+                    stmt.setLong(2, transaccion.getReservaId());
+                    
+                    if (stmt.executeUpdate() != 1) {
+                        throw new SQLException("No se pudo actualizar la reserva");
+                    }
+                }
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    logger.severe("Error al hacer rollback: " + ex.getMessage());
+                }
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    logger.severe("Error al cerrar conexión: " + ex.getMessage());
+                }
+            }
+        }
     }
 }

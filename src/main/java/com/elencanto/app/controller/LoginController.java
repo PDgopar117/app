@@ -8,112 +8,84 @@ import com.elencanto.app.dao.UsuarioDAO;
 import com.elencanto.app.model.Usuario;
 import com.elencanto.app.util.PasswordHash;
 import com.elencanto.app.util.SessionManager;
-
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
 import java.io.IOException;
-import java.util.Optional;
+import java.sql.SQLException;
 import java.util.logging.Logger;
-/**
- *
- * @author Gopar117
- */
+
 public class LoginController {
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
-    
+
     @FXML
     private TextField usuarioField;
-    
+
     @FXML
     private PasswordField passwordField;
-    
-    @FXML
-    private Button loginButton;
-    
-    @FXML
-    private Hyperlink recuperarPasswordButton;
-    
-    private UsuarioDAO usuarioDAO = new UsuarioDAO();
-    
+
+    private UsuarioDAO usuarioDAO;
+
     @FXML
     public void initialize() {
-        // Configuración inicial del controlador
+        usuarioDAO = new UsuarioDAO();
     }
-    
+
     @FXML
-    private void handleLoginAction(ActionEvent event) {
+    private void handleLoginAction() {
         String username = usuarioField.getText();
         String password = passwordField.getText();
-        
+
         if (username.isEmpty() || password.isEmpty()) {
-            mostrarAlerta("Error de validación", "Todos los campos son obligatorios.");
+            mostrarAlerta("Error", "Por favor ingrese usuario y contraseña");
             return;
         }
-        
-        Optional<Usuario> usuarioOpt = usuarioDAO.buscarPorUsername(username);
-        
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
-            
-            // En un sistema real, verificar hash de contraseña
-            if (verificarPassword(password, usuario.getPassword())) {
-                // Iniciar sesión
+
+        try {
+            Usuario usuario = usuarioDAO.buscarPorUsername(username);
+            if (usuario != null && PasswordHash.verify(password, usuario.getPassword())) {
                 SessionManager.getInstance().setUsuarioActual(usuario);
-                
-                try {
-                    // Cargar el dashboard
-                     FXMLLoader loader = new FXMLLoader();
-    loader.setLocation(getClass().getResource("/fxml/Dashboard.fxml"));
-    Parent root = loader.load();
-    
-    Scene scene = new Scene(root);
-    Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-    
-    stage.setTitle("El Encanto - Panel Principal");
-    stage.setScene(scene);
-    stage.setResizable(true);
-    stage.setMaximized(true);
-    stage.show();
-    
-    logger.info("Usuario " + username + " inició sesión correctamente");
-} catch (IOException e) {
-    logger.severe("Error al cargar el dashboard: " + e.getMessage() + "\nCausa: " + e.getCause());
-    e.printStackTrace(); // Imprime el stacktrace completo para depuración
-    mostrarAlerta("Error", "No se pudo cargar la siguiente pantalla: " + e.getMessage());
-}
+                cargarDashboard();
             } else {
-                mostrarAlerta("Error de autenticación", "Contraseña incorrecta.");
+                mostrarAlerta("Error", "Usuario o contraseña incorrectos");
             }
-        } else {
-            mostrarAlerta("Error de autenticación", "El usuario no existe.");
+        } catch (SQLException e) {
+            logger.severe("Error al intentar iniciar sesión: " + e.getMessage());
+            mostrarAlerta("Error", "Error al intentar iniciar sesión");
         }
     }
-    
-    @FXML
-    private void handleRecuperarPassword(ActionEvent event) {
-        mostrarAlerta("Recuperar contraseña", "Se enviará un enlace de recuperación al correo registrado.");
-        // Aquí iría la lógica para recuperar la contraseña
-    }
-    
-    private boolean verificarPassword(String inputPassword, String storedPassword) {
-        // En un sistema real, usar BCrypt o similar
-        // Por ahora, comparación simple para demo
-        return inputPassword.equals(storedPassword);
-    }
-    
-    private void mostrarAlerta(String titulo, String mensaje) {
+     @FXML
+    private void handleRecuperarPassword() {  // Agregar este método faltante
+        // Por ahora, solo mostrar un mensaje
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Recuperar Contraseña");
+        alert.setHeaderText(null);
+        alert.setContentText("La funcionalidad de recuperación de contraseña no está implementada aún.");
+        alert.showAndWait();
+    }
+
+    private void cargarDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Dashboard.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+            Stage stage = (Stage) usuarioField.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Dashboard - El Encanto");
+            stage.show();
+        } catch (IOException e) {
+            logger.severe("Error al cargar el dashboard: " + e.getMessage());
+            mostrarAlerta("Error", "No se pudo cargar el dashboard");
+        }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(titulo);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);

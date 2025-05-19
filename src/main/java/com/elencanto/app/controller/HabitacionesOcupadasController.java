@@ -5,122 +5,57 @@
 package com.elencanto.app.controller;
 
 import com.elencanto.app.dao.HabitacionDAO;
-import com.elencanto.app.dao.ReservaDAO;
-import com.elencanto.app.dao.TransaccionDAO;
 import com.elencanto.app.model.Habitacion;
-import com.elencanto.app.model.Reserva;
-import com.elencanto.app.model.Transaccion;
-import com.elencanto.app.util.SessionManager;
-
+import com.elencanto.app.model.TipoHabitacion;
+import com.elencanto.app.model.EstadoHabitacion;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import javafx.scene.control.*;
+import javafx.collections.FXCollections;
 import java.util.List;
+import java.sql.SQLException;
 import java.util.logging.Logger;
-/**
- *
- * @author Gopar117
- */
+
 public class HabitacionesOcupadasController {
     private static final Logger logger = Logger.getLogger(HabitacionesOcupadasController.class.getName());
-    
+
     @FXML
-    private VBox habitacionesContainer;
-    
-    private ReservaDAO reservaDAO = new ReservaDAO();
-    private HabitacionDAO habitacionDAO = new HabitacionDAO();
-    private TransaccionDAO transaccionDAO = new TransaccionDAO();
-    
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-    
+    private TableView<Habitacion> habitacionesTable;
+
+    private HabitacionDAO habitacionDAO;
+
     @FXML
     public void initialize() {
-        cargarHabitacionesOcupadas();
+        habitacionDAO = new HabitacionDAO();
+        cargarHabitaciones();
     }
-    
-    private void cargarHabitacionesOcupadas() {
-        habitacionesContainer.getChildren().clear();
-        
-        List<Reserva> reservasActivas = reservaDAO.listarPorEstado(Reserva.EstadoReserva.ACTIVA);
-        
-        for (Reserva reserva : reservasActivas) {
-            VBox reservaItem = crearReservaItem(reserva);
-            habitacionesContainer.getChildren().add(reservaItem);
-        }
-    }
-    
-    private VBox crearReservaItem(Reserva reserva) {
-        VBox item = new VBox(5);
-        item.getStyleClass().add("reserva-item");
-        
-        Habitacion habitacion = reserva.getHabitacion();
-        
-        // Crear elementos de la reserva
-        Button habitacionBtn = new Button("Habitación " + habitacion.getNumero());
-        habitacionBtn.getStyleClass().add("titulo-habitacion");
-        
-        String tipoHabitacion = habitacion.getTipo() == Habitacion.TipoHabitacion.STANDARD ? 
-                                "Standard" : "Suite";
-        
-        Button tipoBtn = new Button(tipoHabitacion);
-        tipoBtn.getStyleClass().add("tipo-habitacion");
-        
-        String checkInTexto = "Check-in: " + reserva.getCheckIn().format(formatter);
-        String checkOutTexto = "Check-out: " + reserva.getCheckOut().format(formatter);
-        
-        Button checkInBtn = new Button(checkInTexto);
-        Button checkOutBtn = new Button(checkOutTexto);
-        
-        Duration tiempoRestante = reserva.getTiempoRestante();
-        String tiempoTexto = "";
-        
-        if (tiempoRestante.isNegative()) {
-            tiempoTexto = "Tiempo excedido";
-        } else {
-            long horas = tiempoRestante.toHours();
-            long minutos = tiempoRestante.toMinutesPart();
-            tiempoTexto = String.format("%dh %02dm", horas, minutos);
-        }
-        
-        Button tiempoBtn = new Button("Restante: " + tiempoTexto);
-        
-        Button finalizarBtn = new Button("Finalizar");
-        finalizarBtn.getStyleClass().add("btn-finalizar");
-        finalizarBtn.setOnAction(event -> finalizarReserva(reserva));
-        
-        // Añadir elementos al contenedor
-        item.getChildren().addAll(habitacionBtn, tipoBtn, checkInBtn, 
-                                 checkOutBtn, tiempoBtn, finalizarBtn);
-        
-        return item;
-    }
-    
-    private void finalizarReserva(Reserva reserva) {
+
+    private void cargarHabitaciones() {
         try {
-            // Cambiar estado de la reserva
-            reserva.setEstado(Reserva.EstadoReserva.FINALIZADA);
-            reservaDAO.actualizarReserva(reserva);
-            
-            // Cambiar estado de la habitación a limpieza
-            Habitacion habitacion = reserva.getHabitacion();
-            habitacion.setEstado(Habitacion.EstadoHabitacion.LIMPIEZA);
-            habitacionDAO.actualizarHabitacion(habitacion);
-            
-            mostrarAlerta("Éxito", "Reserva finalizada correctamente.");
-            
-            // Recargar la lista
-            cargarHabitacionesOcupadas();
-        } catch (Exception e) {
-            logger.severe("Error al finalizar reserva: " + e.getMessage());
-            mostrarAlerta("Error", "No se pudo finalizar la reserva.");
+            List<Habitacion> habitaciones = habitacionDAO.obtenerTodas();
+            habitacionesTable.setItems(FXCollections.observableArrayList(habitaciones));
+        } catch (SQLException e) {
+            logger.severe("Error al cargar habitaciones: " + e.getMessage());
+            mostrarAlerta("Error", "No se pudieron cargar las habitaciones");
         }
     }
-    
+
+    @FXML
+    private void liberarHabitacion() {
+        Habitacion habitacion = habitacionesTable.getSelectionModel().getSelectedItem();
+        if (habitacion != null) {
+            try {
+                habitacion.setEstado(EstadoHabitacion.LIMPIEZA);
+                if (habitacionDAO.actualizarHabitacion(habitacion)) {
+                    cargarHabitaciones();
+                    mostrarAlerta("Éxito", "Habitación marcada para limpieza");
+                }
+            } catch (SQLException e) {
+                logger.severe("Error al liberar habitación: " + e.getMessage());
+                mostrarAlerta("Error", "No se pudo liberar la habitación");
+            }
+        }
+    }
+
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(titulo);
@@ -128,5 +63,4 @@ public class HabitacionesOcupadasController {
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
-    
 }
