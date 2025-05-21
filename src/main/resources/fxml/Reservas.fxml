@@ -18,7 +18,7 @@
     <HBox alignment="CENTER_LEFT" spacing="20">
         <Label text="Gestión de Reservas" styleClass="titulo-seccion"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="nuevaReservaButton" text="Nueva Reserva" styleClass="boton-primario"/>
+        <Button fx:id="nuevaReservaButton" text="Nueva Reserva" styleClass="boton-primario" onAction="#handleNuevaReserva"/>
     </HBox>
     
     <TabPane>

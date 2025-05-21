@@ -41,7 +41,7 @@
                         <Label text="admin@motel.com" styleClass="user-email"/>
                     </VBox>
                 </HBox>
-                <Button text="Cerrar Sesión" styleClass="logout-button"/>
+                <Button text="Cerrar Sesión" styleClass="logout-button" onAction="#handleCerrarSesion"/>
             </VBox>
         </VBox>
     </left>
