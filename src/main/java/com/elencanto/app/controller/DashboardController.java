@@ -4,9 +4,11 @@
  */
 package com.elencanto.app.controller;
 
+import com.elencanto.app.util.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,7 +17,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.stage.Stage;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DashboardController {
@@ -41,6 +45,9 @@ public class DashboardController {
     
     @FXML
     private Button configuracionButton;
+    
+    @FXML
+    private Button cerrarSesionButton; // Añadido: Debes tener este botón en tu FXML
 
     @FXML
     public void initialize() {
@@ -109,8 +116,40 @@ public class DashboardController {
     }
 
     @FXML
-    private void handleCerrarSesion() {
-        // Implementar lógica de cierre de sesión
+    public void handleCerrarSesion() {
+        try {
+        logger.info("Iniciando proceso de cierre de sesión");
+        
+        // 1. Cerrar la sesión en el SessionManager
+        SessionManager.getInstance().cerrarSesion();
+        
+        // 2. Obtener la ventana actual usando cualquier otro control que sabemos que existe
+        Stage currentStage = (Stage) dashboardButton.getScene().getWindow();
+        
+        // 3. Cargar la pantalla de login
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+        Parent root = loader.load();
+        
+        // 4. Crear nueva escena
+        Scene scene = new Scene(root);
+        
+        // 5. Configurar y mostrar la nueva ventana
+        Stage loginStage = new Stage();
+        loginStage.setTitle("El Encanto - Iniciar Sesión");
+        loginStage.setScene(scene);
+        loginStage.show();
+        
+        // 6. Cerrar la ventana actual
+        currentStage.close();
+        
+        logger.info("Sesión cerrada correctamente");
+    } catch (IOException e) {
+        logger.log(Level.SEVERE, "Error al cargar la pantalla de login", e);
+        mostrarAlerta("Error", "No se pudo cargar la pantalla de inicio de sesión");
+    } catch (Exception e) {
+        logger.log(Level.SEVERE, "Error inesperado al cerrar sesión", e);
+        mostrarAlerta("Error", "Ocurrió un error al cerrar la sesión: " + e.getMessage());
+    }
     }
 
     private void cargarVista(String fxml, String botonId) {

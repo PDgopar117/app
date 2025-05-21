@@ -16,6 +16,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -29,6 +32,9 @@ public class NuevaReservaController {
     
     @FXML
     private DatePicker fechaInicioPicker;
+    
+    @FXML
+    private ComboBox<String> horaLlegadaComboBox; // Nuevo campo para hora de llegada
     
     @FXML
     private TextField horasField;
@@ -46,6 +52,7 @@ public class NuevaReservaController {
         
         configurarComboBox();
         cargarHabitacionesDisponibles();
+        configurarHorasLlegada(); // Configurar nuevo campo
         
         // Agregar listeners para cálculo automático
         habitacionComboBox.valueProperty().addListener((obs, oldVal, newVal) -> calcularTotal());
@@ -75,6 +82,22 @@ public class NuevaReservaController {
                 return null;
             }
         });
+    }
+    
+    // Nuevo método para configurar el ComboBox de horas de llegada
+    private void configurarHorasLlegada() {
+        ObservableList<String> horasDisponibles = FXCollections.observableArrayList();
+        
+        // Generar horas disponibles (formato 24h)
+        for (int hora = 0; hora < 24; hora++) {
+            horasDisponibles.add(String.format("%02d:00", hora));
+            horasDisponibles.add(String.format("%02d:30", hora));
+        }
+        
+        horaLlegadaComboBox.setItems(horasDisponibles);
+        
+        // Establecer hora predeterminada (14:00)
+        horaLlegadaComboBox.setValue("14:00");
     }
 
     private void cargarHabitacionesDisponibles() {
@@ -116,7 +139,20 @@ public class NuevaReservaController {
             }
 
             Habitacion habitacion = habitacionComboBox.getValue();
-            LocalDateTime fechaInicio = LocalDateTime.now();
+            
+            // Usar la fecha y hora de llegada seleccionadas
+            LocalDate fecha = fechaInicioPicker.getValue();
+            if (fecha == null) {
+                fecha = LocalDate.now(); // Por defecto, usar la fecha actual
+            }
+            
+            // Obtener la hora de llegada seleccionada y convertirla a LocalTime
+            String horaSeleccionada = horaLlegadaComboBox.getValue();
+            LocalTime horaLlegada = LocalTime.parse(horaSeleccionada, DateTimeFormatter.ofPattern("HH:mm"));
+            
+            // Combinar fecha y hora para crear el LocalDateTime
+            LocalDateTime fechaInicio = LocalDateTime.of(fecha, horaLlegada);
+            
             int horas = Integer.parseInt(horasField.getText());
             LocalDateTime fechaFin = fechaInicio.plusHours(horas);
             
@@ -131,7 +167,7 @@ public class NuevaReservaController {
                 habitacion.setEstado(EstadoHabitacion.OCUPADA);
                 habitacionDAO.actualizarHabitacion(habitacion);
                 
-                mostrarAlerta("Éxito", "Reserva creada correctamente");
+                mostrarAlerta("Éxito", "Reserva creada correctamente para las " + horaSeleccionada);
                 limpiarFormulario();
                 cargarHabitacionesDisponibles();
             }
@@ -144,6 +180,11 @@ public class NuevaReservaController {
     private boolean validarCampos() {
         if (habitacionComboBox.getValue() == null) {
             mostrarAlerta("Error", "Debe seleccionar una habitación");
+            return false;
+        }
+
+        if (horaLlegadaComboBox.getValue() == null) {
+            mostrarAlerta("Error", "Debe seleccionar una hora de llegada");
             return false;
         }
 
@@ -174,6 +215,7 @@ public class NuevaReservaController {
     private void limpiarFormulario() {
         habitacionComboBox.setValue(null);
         horasField.clear();
+        horaLlegadaComboBox.setValue("14:00"); // Restaurar valor predeterminado
         totalLabel.setText("Total: $0.00");
     }
 

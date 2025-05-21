@@ -101,7 +101,7 @@ public class DashboardInicioController {
         TextField horasField = new TextField();
         horasField.setPromptText("Número de horas");
         
-        Label totalLabel = new Label("Total: $0.00");
+        Label totalLabel = new Label("Total: 0.00");
         totalLabel.setStyle("-fx-font-weight: bold;");
         
         // Cálculo del total
@@ -112,7 +112,7 @@ public class DashboardInicioController {
                     double tarifa = 150.0; // Tarifa base ejemplo
                     totalLabel.setText(String.format("Total: $%.2f", horas * tarifa));
                 } catch (NumberFormatException e) {
-                    totalLabel.setText("Total: $0.00");
+                    totalLabel.setText("Total: 0.00");
                 }
             } else {
                 horasField.setText(newValue.replaceAll("[^\\d]", ""));
@@ -158,8 +158,8 @@ public class DashboardInicioController {
         // Aquí cargarías los datos reales desde tu base de datos
         ocupacionLabel.setText("75%");
         habitacionesLabel.setText("8");
-        ingresosLabel.setText("$458.900");
-        egresosLabel.setText("$156.700");
+        ingresosLabel.setText("458.900");
+        egresosLabel.setText("156.700");
     }
 
     private void cargarHabitaciones() {
