@@ -9,7 +9,7 @@
       fx:controller="com.elencanto.app.controller.ConfiguracionController"
       styleClass="configuracion-container" 
       spacing="20"
-      stylesheets="/styles/styles.css">
+      stylesheets="/css/styles.css">
     
     <padding>
         <Insets top="30" right="30" bottom="30" left="30"/>

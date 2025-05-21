@@ -1,82 +1,89 @@
-/* Estilos para el Dashboard Inicio */
-.dashboard-inicio {
-    -fx-background-color: #F8F9FA;
-}
-
-.header-container {
-    -fx-padding: 0 0 20 0;
-}
-
-.btn-nueva-reserva {
-    -fx-background-color: #6C38FF;
-    -fx-background-radius: 8;
-    -fx-padding: 10 20;
-}
-
-.btn-nueva-reserva:hover {
-    -fx-background-color: derive(#6C38FF, -10%);
-}
-
-/* Tarjetas de estadísticas */
-.stat-card {
+.configuracion-container {
     -fx-background-color: white;
     -fx-padding: 20;
-    -fx-background-radius: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);
-    -fx-pref-width: 250;
 }
 
-.stat-title {
-    -fx-font-size: 14;
-    -fx-text-fill: #6C757D;
-}
-
-.stat-value {
-    -fx-font-size: 24;
+.titulo-seccion {
+    -fx-font-size: 24px;
     -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
 }
 
-/* Estado de habitaciones */
-.section-title {
-    -fx-font-size: 20;
+.subtitulo-seccion {
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
+    -fx-padding: 10 0 5 0;
 }
 
-.status-dot {
-    -fx-stroke: none;
+.texto-info {
+    -fx-font-size: 12px;
+    -fx-text-fill: #666666;
 }
 
-.status-dot.available {
-    -fx-fill: #2ECC71;
+.boton-primario {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
 }
 
-.status-dot.occupied {
-    -fx-fill: #E74C3C;
+.boton-primario:hover {
+    -fx-background-color: #0056b3;
 }
 
-.status-dot.cleaning {
-    -fx-fill: #F1C40F;
+.boton-secundario {
+    -fx-background-color: #6c757d;
+    -fx-text-fill: white;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
 }
 
-/* Tarjetas de habitaciones */
-.room-card {
+.boton-secundario:hover {
+    -fx-background-color: #545b62;
+}
+
+.configuracion-tabs {
+    -fx-background-color: transparent;
+}
+
+.configuracion-tabs .tab-header-area {
+    -fx-padding: 5;
+}
+
+.configuracion-tabs .tab {
+    -fx-padding: 8 15;
+    -fx-background-color: #f8f9fa;
+}
+
+.configuracion-tabs .tab:selected {
     -fx-background-color: white;
-    -fx-padding: 15;
-    -fx-background-radius: 8;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
 }
 
-.room-number {
-    -fx-font-weight: bold;
-    -fx-font-size: 16;
+.text-field, .password-field {
+    -fx-pref-width: 250;
+    -fx-padding: 5 8;
 }
 
-.room-type {
-    -fx-text-fill: #6C757D;
-    -fx-font-size: 14;
+.grid-pane {
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-padding: 10;
 }
 
-.room-time {
-    -fx-text-fill: #6C757D;
-    -fx-font-size: 12;
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #007bff;
 }

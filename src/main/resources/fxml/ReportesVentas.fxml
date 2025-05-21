@@ -20,11 +20,11 @@
     </HBox>
 
     <GridPane hgap="10" vgap="10">
-        <Label fx:id="totalIngresosLabel" text="Total Ingresos: $0.00"
+        <Label fx:id="totalIngresosLabel" text="Total Ingresos: 0.00"
                GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <Label fx:id="totalEgresosLabel" text="Total Egresos: $0.00"
+        <Label fx:id="totalEgresosLabel" text="Total Egresos: 0.00"
                GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-        <Label fx:id="balanceLabel" text="Balance: $0.00"
+        <Label fx:id="balanceLabel" text="Balance: 0.00"
                GridPane.columnIndex="2" GridPane.rowIndex="0"/>
         <Label fx:id="totalReservasLabel" text="Total Reservas: 0"
                GridPane.columnIndex="3" GridPane.rowIndex="0"/>

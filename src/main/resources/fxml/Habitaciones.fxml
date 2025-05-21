@@ -19,7 +19,7 @@
     <HBox alignment="CENTER_LEFT" spacing="20">
         <Label text="Administración de Habitaciones" styleClass="titulo-seccion"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="agregarHabitacionButton" text="Nueva Habitación" styleClass="boton-primario"/>
+        <Button fx:id="agregarHabitacionButton" text="Nueva Habitación" onAction="#agregarHabitacion" styleClass="boton-primario"/>
     </HBox>
     
     <HBox styleClass="tarjetas-container">

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.elencanto.app.controller.NuevoEgresoController"
+      spacing="15" padding="20">
+      
+    <Label text="Registrar Nuevo Egreso" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    
+    <GridPane vgap="10" hgap="10">
+        <columnConstraints>
+            <ColumnConstraints hgrow="NEVER" minWidth="100"/>
+            <ColumnConstraints hgrow="ALWAYS" minWidth="200"/>
+        </columnConstraints>
+        
+        <Label text="Concepto:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="conceptoField" promptText="Ej: Pago de servicios" 
+                  GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        
+        <Label text="Monto:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="montoField" promptText="Ej: 500.00" 
+                  GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        
+        <Label text="Fecha:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="fechaPicker" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        
+        <Label text="Categoría:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="categoriaComboBox" promptText="Seleccionar categoría" 
+                 GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                 
+        <Label text="Notas:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextArea fx:id="notasTextArea" promptText="Notas adicionales (opcional)" 
+                 GridPane.rowIndex="4" GridPane.columnIndex="1" prefRowCount="3"/>
+    </GridPane>
+    
+    <Separator/>
+    
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelarButton" text="Cancelar" onAction="#handleCancelar"/>
+        <Button fx:id="guardarButton" text="Guardar" onAction="#handleGuardar" 
+                style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>
