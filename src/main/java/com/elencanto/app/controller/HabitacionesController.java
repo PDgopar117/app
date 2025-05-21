@@ -10,16 +10,27 @@ import com.elencanto.app.model.EstadoHabitacion;
 import com.elencanto.app.model.TipoHabitacion;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.collections.FXCollections;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HabitacionesController {
     private static final Logger logger = Logger.getLogger(HabitacionesController.class.getName());
+    private static long lastClickTime = 0;
 
     @FXML
     private Button agregarHabitacionButton;
@@ -70,6 +81,9 @@ public class HabitacionesController {
         try {
             // Inicializar DAO
             habitacionDAO = new HabitacionDAO();
+            
+            // Conectar el botón programáticamente (alternativa a modificar el FXML)
+            agregarHabitacionButton.setOnAction(event -> agregarHabitacion());
             
             // Configurar columnas
             numeroColumn.setCellValueFactory(new PropertyValueFactory<>("numero"));
@@ -141,6 +155,135 @@ public class HabitacionesController {
     @FXML
     private void agregarHabitacion() {
         // Implementar lógica para agregar habitación
+        long currentTime = System.currentTimeMillis();
+        if(currentTime - lastClickTime < 500){
+            return;
+        }
+        lastClickTime = currentTime;
+        
+        logger.info("Abriendo formulario de nueva habitacion...");
+        
+        try {
+            // Intentar cargar el FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/NuevaHabitacion.fxml"));
+            Parent root = loader.load();
+            
+            Stage stage = new Stage();
+            stage.setTitle("Nueva Habitación");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL); // Bloquea la ventana principal
+            stage.showAndWait();
+            
+            // Después de cerrar el diálogo, recargar las habitaciones
+            cargarHabitaciones();
+            
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error al abrir formulario de nueva habitación", e);
+            
+            // Si falla, mostrar un formulario simplificado
+            crearFormularioHabitacionSencillo();
+        }
+    }
+
+    private void crearFormularioHabitacionSencillo() {
+        Stage stage = new Stage();
+        stage.setTitle("Nueva Habitación");
+        
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(20));
+        root.setAlignment(Pos.TOP_LEFT);
+        
+        Label titulo = new Label("Crear Nueva Habitación");
+        titulo.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        
+        Label numeroLabel = new Label("Número de Habitación:");
+        TextField numeroField = new TextField();
+        numeroField.setPromptText("Ejemplo: 101");
+        
+        Label tipoLabel = new Label("Tipo de Habitación:");
+        ComboBox<TipoHabitacion> tipoCombo = new ComboBox<>(
+            FXCollections.observableArrayList(TipoHabitacion.values())
+        );
+        
+        
+        Label tarifaLabel = new Label("Tarifa por Hora:");
+        TextField tarifaField = new TextField();
+        tarifaField.setPromptText("Ejemplo: 150.00");
+        
+        Label caracteristicasLabel = new Label("Características:");
+        TextArea caracteristicasArea = new TextArea();
+        caracteristicasArea.setPrefRowCount(4);
+        caracteristicasArea.setPromptText("Ingrese características separadas por comas");
+        
+        HBox buttons = new HBox(10);
+        Button guardarBtn = new Button("Guardar Habitación");
+        guardarBtn.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
+        
+        Button cancelarBtn = new Button("Cancelar");
+        
+        guardarBtn.setOnAction(e -> {
+            // Validar campos
+            if (numeroField.getText().isEmpty() || tarifaField.getText().isEmpty()) {
+                mostrarAlerta("Error", "Debe completar los campos obligatorios");
+                return;
+            }
+            
+            try {
+                double tarifa = Double.parseDouble(tarifaField.getText());
+                
+                // Crear objeto habitación
+                Habitacion nuevaHabitacion = new Habitacion();
+                nuevaHabitacion.setNumero(numeroField.getText());
+                nuevaHabitacion.setTipo(tipoCombo.getValue());
+                nuevaHabitacion.setEstado(EstadoHabitacion.DISPONIBLE);
+                nuevaHabitacion.setTarifa(tarifa);
+                nuevaHabitacion.setCaracteristicas(caracteristicasArea.getText());
+                
+                // Guardar en la base de datos
+                try {
+                    if (habitacionDAO.crearHabitacion(nuevaHabitacion)) {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Éxito");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Habitación creada exitosamente");
+                        alert.showAndWait();
+                        
+                        // Recargar habitaciones
+                        cargarHabitaciones();
+                        
+                        stage.close();
+                    } else {
+                        mostrarAlerta("Error", "No se pudo crear la habitación");
+                    }
+                } catch (SQLException ex) {
+                    logger.severe("Error al crear habitación: " + ex.getMessage());
+                    mostrarAlerta("Error", "Error al crear habitación: " + ex.getMessage());
+                }
+                
+            } catch (NumberFormatException ex) {
+                mostrarAlerta("Error", "La tarifa debe ser un número válido");
+            }
+        });
+        
+        cancelarBtn.setOnAction(e -> stage.close());
+        
+        buttons.getChildren().addAll(guardarBtn, cancelarBtn);
+        buttons.setAlignment(Pos.CENTER_RIGHT);
+        
+        root.getChildren().addAll(
+            titulo,
+            numeroLabel, numeroField,
+            tipoLabel, tipoCombo,
+            tarifaLabel, tarifaField,
+            caracteristicasLabel, caracteristicasArea,
+            new Separator(),
+            buttons
+        );
+        
+        stage.setScene(new Scene(root, 450, 450));
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setOnHidden(e -> cargarHabitaciones()); // Recargar al cerrar
+        stage.show();
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {
